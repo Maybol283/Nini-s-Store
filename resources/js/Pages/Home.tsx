@@ -1,8 +1,8 @@
-import React from "react";
+import MainLayout from "@/Layouts/MainLayout";
 import { Head } from "@inertiajs/react";
-import { useTrail, animated } from "@react-spring/web";
+import { useTrail, useSpring, animated } from "@react-spring/web";
 
-const About = ({ message }: { message: string }) => {
+export default function Home({ message }: { message: string }) {
     const title = "Nini's Garments";
 
     const [t1, t2] = title.split(" ");
@@ -27,23 +27,33 @@ const About = ({ message }: { message: string }) => {
     });
 
     return (
-        <div className="flex items-center justify-center h-screen">
+        <div className="flex items-center justify-center h-screen bg-cream">
             <Head title="About" />
-            <div className="text-center">
+            <div className="text-center ">
                 <h1 className="text-9xl mb-4">
                     {trail1.map((style, index) => (
+                        //@ts-ignore I have no idea why typescript cannot understand this
                         <animated.span
                             key={`t1-${index}`}
-                            style={{ ...style, display: "inline-block" }}
-                            children={letters1[index]} // Pass children as a prop explicitly
-                        />
+                            style={
+                                {
+                                    ...style,
+                                    display: "inline-block",
+                                } as any
+                            }
+                            className=" text-green"
+                        >
+                            {letters1[index]}
+                        </animated.span>
                     ))}
                 </h1>
                 <h1 className="text-9xl mb-4">
                     {trail2.map((style, index) => (
+                        //@ts-ignore
                         <animated.span
                             key={`t2-${index}`}
                             style={{ ...style, display: "inline-block" }}
+                            className=" text-green"
                         >
                             {letters2[index]}
                         </animated.span>
@@ -52,6 +62,9 @@ const About = ({ message }: { message: string }) => {
             </div>
         </div>
     );
-};
+}
 
-export default About;
+// Attach the layout
+Home.layout = (page: React.ReactNode) => (
+    <MainLayout title="Dashboard" children={page} />
+);

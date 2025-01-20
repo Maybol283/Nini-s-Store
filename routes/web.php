@@ -11,7 +11,7 @@ Route::get('/', function () {
 
 
 Route::get('about', function () {
-    return Inertia::render('About', [
+    return Inertia::render('Home', [
         'message' => 'Welcome to the About Us page!',
     ]);
 });
