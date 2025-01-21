@@ -27,7 +27,7 @@ export default function Home({ message }: { message: string }) {
     });
 
     return (
-        <div className="flex items-center justify-center h-screen bg-cream">
+        <div className="flex items-center justify-center h-screen bg-cream font-thin">
             <Head title="About" />
             <div className="text-center ">
                 <h1 className="text-9xl mb-4">
@@ -41,7 +41,7 @@ export default function Home({ message }: { message: string }) {
                                     display: "inline-block",
                                 } as any
                             }
-                            className=" text-green"
+                            className=" text-charcoal"
                         >
                             {letters1[index]}
                         </animated.span>
@@ -53,7 +53,7 @@ export default function Home({ message }: { message: string }) {
                         <animated.span
                             key={`t2-${index}`}
                             style={{ ...style, display: "inline-block" }}
-                            className=" text-green"
+                            className=" text-charcoal"
                         >
                             {letters2[index]}
                         </animated.span>
