@@ -24,7 +24,35 @@ export default {
             fontFamily: {
                 sans: ["Figtree", ...defaultTheme.fontFamily.sans],
             },
+            strokeWidth: {
+                sm: "1px",
+                md: "2px",
+                lg: "4px",
+            },
         },
     },
-    plugins: [],
+    plugins: [
+        require("tailwind-scrollbar")({ nocompatible: true }),
+        function ({ matchUtilities, theme }) {
+            // Dynamic text outline colors
+            matchUtilities(
+                {
+                    "text-outline": (value) => ({
+                        "-webkit-text-stroke": `1px ${value}`, // 2px stroke width by default
+                    }),
+                },
+                { values: theme("colors") } // Use Tailwind's color palette
+            );
+
+            // Dynamic outline width
+            matchUtilities(
+                {
+                    "outline-width": (value) => ({
+                        "-webkit-text-stroke-width": value,
+                    }),
+                },
+                { values: theme("strokeWidth") }
+            );
+        },
+    ],
 };

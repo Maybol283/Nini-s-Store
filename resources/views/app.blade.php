@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="size-screen modak">
+<html class="scroll-smooth size-screen modak">
 
 <head>
     <meta charset="utf-8">
@@ -10,7 +10,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.tsx'])
 </head>
 
-<body class="font-sans antialiased leading-none size-full">
+<body class="font-sans antialiased leading-none size-full ">
     @inertia
 </body>
 

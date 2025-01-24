@@ -8,16 +8,32 @@ interface MainLayoutProps {
     children: React.ReactNode;
 }
 
+const handleHorizontalScroll = (e: React.WheelEvent<HTMLDivElement>) => {
+    const container = e.currentTarget;
+
+    // Prevent default vertical scrolling
+    e.preventDefault();
+
+    // Scroll horizontally instead
+    container.scrollBy({
+        left: e.deltaY, // Use vertical scroll delta for horizontal scrolling
+        behavior: "smooth",
+    });
+};
+
 export default function MainLayout({ title, children }: MainLayoutProps) {
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col max-h-screen bg-brown text-outline-pink ">
             {/* Page Title */}
             <Head title={title || "Default Title"} />
 
             {/* Header */}
             <Header />
 
-            <main className="flex-grow flex overflow-x-auto snap-x snap-mandatory">
+            <main
+                className="flex-grow flex overflow-y-hidden overflow-x-auto snap-x snap-mandatory scrollbar-bottom"
+                onWheel={handleHorizontalScroll}
+            >
                 {children}
             </main>
 

@@ -41,7 +41,7 @@ export default function Home({ message }: { message: string }) {
                                     display: "inline-block",
                                 } as any
                             }
-                            className=" text-charcoal"
+                            className=" text-cream"
                         >
                             {letters1[index]}
                         </animated.span>
@@ -53,7 +53,7 @@ export default function Home({ message }: { message: string }) {
                         <animated.span
                             key={`t2-${index}`}
                             style={{ ...style, display: "inline-block" }}
-                            className=" text-charcoal"
+                            className=" text-cream"
                         >
                             {letters2[index]}
                         </animated.span>
@@ -63,8 +63,3 @@ export default function Home({ message }: { message: string }) {
         </div>
     );
 }
-
-// Attach the layout
-Home.layout = (page: React.ReactNode) => (
-    <MainLayout title="Dashboard" children={page} />
-);
