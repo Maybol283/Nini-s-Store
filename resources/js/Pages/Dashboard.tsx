@@ -1,7 +1,8 @@
 import MainLayout from "@/Layouts/MainLayout";
-import Home from "./Home";
-import About from "./About";
-import Gallery from "./Gallery";
+import Home from "./Home/Home";
+import About from "./Home/About";
+import Gallery from "./Home/Gallery";
+import Contact from "./Home/Contact";
 
 const Dashboard = ({ message }: { message: string }) => {
     return (
@@ -19,6 +20,11 @@ const Dashboard = ({ message }: { message: string }) => {
             {/* Render Home Component */}
             <section className="flex-shrink-0 w-screen snap-center">
                 <Gallery />
+            </section>
+
+            {/* Render Contact Component */}
+            <section className="flex-shrink-0 w-screen snap-center">
+                <Contact />
             </section>
         </div>
     );

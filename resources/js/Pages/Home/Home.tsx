@@ -41,7 +41,7 @@ export default function Home({ message }: { message: string }) {
                                     display: "inline-block",
                                 } as any
                             }
-                            className=" text-cream"
+                            className=" text-green"
                         >
                             {letters1[index]}
                         </animated.span>
@@ -53,7 +53,7 @@ export default function Home({ message }: { message: string }) {
                         <animated.span
                             key={`t2-${index}`}
                             style={{ ...style, display: "inline-block" }}
-                            className=" text-cream"
+                            className=" text-green"
                         >
                             {letters2[index]}
                         </animated.span>

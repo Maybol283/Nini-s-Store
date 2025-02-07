@@ -62,15 +62,14 @@ export default function Gallery() {
     });
 
     return (
-        <div className="bg-cream min-h-screen p-2 md:py-10 text-center">
-            <h2 className="text-lg md:text-2xl font-bold mb-4">
+        <div className="bg-cream h-screen flex flex-col">
+            <h2 className="text-lg md:text-2xl font-bold py-2">
                 Here is some of my work
             </h2>
 
             <div
                 ref={ref}
-                // 2 columns on small screens, 4 columns on md and above
-                className="grid grid-cols-2 md:grid-cols-4 gap-2 place-content-center"
+                className="grid grid-cols-2 md:grid-cols-4 gap-2 p-2 overflow-hidden h-[75vh]"
             >
                 {trail.map((style, index) => {
                     const { url, alt } = featuredImages[index];
@@ -78,28 +77,28 @@ export default function Gallery() {
                         <animated.div
                             key={index}
                             style={style}
-                            // Give each cell a fixed height (e.g., 12rem via Tailwind's "h-48")
-                            className="w-full h-80 xl:h-[30rem] overflow-hidden"
+                            className="relative h-full"
                         >
-                            <img
-                                src={url}
-                                alt={alt}
-                                className="w-full h-full object-cover"
-                                loading="lazy"
-                            />
+                            <div className="absolute inset-0">
+                                <img
+                                    src={url}
+                                    alt={alt}
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                />
+                            </div>
                         </animated.div>
                     );
                 })}
             </div>
 
-            {/* Button or link to view full gallery in a separate page */}
-            <div className="mt-6 text-center">
-                <a
-                    href="/all-gallery" // or use React Router <Link to="/all-gallery">...</Link>
-                    className="inline-block px-4 py-2 bg-brown hover:bg-green text-white rounded transition-transform hover:scale-105"
+            <div className="mt-2 py-2 text-center">
+                <button
+                    type="submit"
+                    className="text-green px-8 py-2 border border-green hover:bg-green hover:text-cream transition-colors duration-300"
                 >
                     View All Images
-                </a>
+                </button>
             </div>
         </div>
     );

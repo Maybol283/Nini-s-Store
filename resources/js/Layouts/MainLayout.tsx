@@ -23,7 +23,7 @@ const handleHorizontalScroll = (e: React.WheelEvent<HTMLDivElement>) => {
 
 export default function MainLayout({ title, children }: MainLayoutProps) {
     return (
-        <div className="flex flex-col max-h-screen bg-brown text-outline-pink ">
+        <div className="flex flex-col max-h-screen bg-brown ">
             {/* Page Title */}
             <Head title={title || "Default Title"} />
 
@@ -31,7 +31,7 @@ export default function MainLayout({ title, children }: MainLayoutProps) {
             <Header />
 
             <main
-                className="flex-grow flex overflow-y-hidden overflow-x-auto snap-x snap-mandatory scrollbar-bottom"
+                className="text-green flex-grow flex overflow-y-hidden overflow-x-auto snap-x snap-mandatory scrollbar-bottom"
                 onWheel={handleHorizontalScroll}
             >
                 {children}
