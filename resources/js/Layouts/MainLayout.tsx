@@ -23,7 +23,7 @@ const handleHorizontalScroll = (e: React.WheelEvent<HTMLDivElement>) => {
 
 export default function MainLayout({ title, children }: MainLayoutProps) {
     return (
-        <div className="flex flex-col max-h-screen bg-brown ">
+        <div className="flex flex-col max-h-screen text-outline-green">
             {/* Page Title */}
             <Head title={title || "Default Title"} />
 

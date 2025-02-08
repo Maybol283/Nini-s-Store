@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useInView, useTrail, animated } from "@react-spring/web";
+import { Link } from "@inertiajs/react";
 
 function padToFour(num: number) {
     return String(num).padStart(3, "0");
@@ -62,11 +63,7 @@ export default function Gallery() {
     });
 
     return (
-        <div className="bg-cream h-screen flex flex-col">
-            <h2 className="text-lg md:text-2xl font-bold py-2">
-                Here is some of my work
-            </h2>
-
+        <div className="bg-cream h-screen flex flex-col xl:pt-8">
             <div
                 ref={ref}
                 className="grid grid-cols-2 md:grid-cols-4 gap-2 p-2 overflow-hidden h-[75vh]"
@@ -93,12 +90,13 @@ export default function Gallery() {
             </div>
 
             <div className="mt-2 py-2 text-center">
-                <button
+                <Link
+                    href="/"
                     type="submit"
-                    className="text-green px-8 py-2 border border-green hover:bg-green hover:text-cream transition-colors duration-300"
+                    className="text-outline-green px-8 py-2 border border-green hover:bg-green hover:text-cream transition-colors duration-300"
                 >
                     View All Images
-                </button>
+                </Link>
             </div>
         </div>
     );

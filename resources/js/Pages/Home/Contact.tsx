@@ -19,7 +19,7 @@ export default function Contact() {
     });
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen w-screen bg-cream text-green font-thin p-8">
+        <div className="flex flex-col items-center justify-center min-h-screen w-screen bg-cream font-thin p-8">
             <h1 className="text-8xl text-center mb-8">Contact Me</h1>
 
             <form ref={ref} className="w-full max-w-lg space-y-8">
@@ -31,7 +31,8 @@ export default function Contact() {
                                     {formFields[index]}
                                 </label>
                                 <textarea
-                                    className="w-full h-32 bg-transparent border-b border-green focus:outline-none resize-none"
+                                    className="w-full h-32 bg-transparent border-b border-green focus:outline-none resize-none font-sans bg-beige rounded-md"
+                                    placeholder="Enter your message..."
                                     required
                                 />
                             </div>
@@ -42,7 +43,12 @@ export default function Contact() {
                                 </label>
                                 <input
                                     type={index === 1 ? "email" : "text"}
-                                    className="w-full bg-transparent border-b border-green focus:outline-none"
+                                    className="w-full bg-transparent border-b border-green focus:outline-none font-sans bg-beige rounded-md"
+                                    placeholder={
+                                        index === 1
+                                            ? "Enter your email..."
+                                            : "Enter your name..."
+                                    }
                                     required
                                 />
                             </div>

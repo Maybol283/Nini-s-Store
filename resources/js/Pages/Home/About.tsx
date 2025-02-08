@@ -22,7 +22,7 @@ export default function About() {
     });
 
     return (
-        <div className="flex items-center justify-center h-screen w-screen bg-cream text-green font-thin">
+        <div className="flex items-center justify-center h-screen w-screen bg-cream  font-thin">
             <p className="text-7xl w-[30%]" ref={ref}>
                 {about_text_array.map((text, index) => (
                     <animated.span

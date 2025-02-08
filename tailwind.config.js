@@ -23,6 +23,7 @@ export default {
             },
             fontFamily: {
                 sans: ["Figtree", ...defaultTheme.fontFamily.sans],
+                modak: ["Modak", "cursive"],
             },
             strokeWidth: {
                 sm: "1px",

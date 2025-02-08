@@ -6,7 +6,7 @@ import Contact from "./Home/Contact";
 
 const Dashboard = ({ message }: { message: string }) => {
     return (
-        <div className="flex min-w-full text-cream">
+        <div className="flex min-w-full text-white">
             {/* Render Home Component */}
             <section className="flex-shrink-0 w-screen snap-center">
                 <Home message={message} />

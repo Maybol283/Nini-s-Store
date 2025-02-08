@@ -12,3 +12,7 @@ Route::get('/', function () {
 Route::get('/size-guide', function () {
     return Inertia::render('SizeGuide');
 });
+
+Route::get('/shop', function () {
+    return Inertia::render('Shop/BaseShop');
+});
