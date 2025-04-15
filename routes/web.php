@@ -14,5 +14,9 @@ Route::get('/size-guide', function () {
 });
 
 Route::get('/shop', function () {
-    return Inertia::render('Shop/BaseShop');
+    return Inertia::render('Shop/ShopLandingPage');
+});
+
+Route::get('/shop/search', function () {
+    return Inertia::render('Shop/ShopBrowse');
 });

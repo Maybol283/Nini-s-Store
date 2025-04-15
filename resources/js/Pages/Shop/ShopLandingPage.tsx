@@ -1,7 +1,8 @@
 import React from "react";
 import ShopLayout from "@/Layouts/ShopLayout";
+import { Link } from "@inertiajs/react";
 
-export default function BaseShop() {
+export default function ShopLandingPage() {
     return (
         <ShopLayout>
             <div className="p-8 font-sans">
@@ -110,9 +111,11 @@ export default function BaseShop() {
                         Every item is handmade and one of a kind. Experience the
                         uniqueness of our collection.
                     </p>
-                    <button className="mt-6 px-8 py-2 border border-green hover:bg-green hover:text-cream transition-colors duration-300">
-                        Explore Now
-                    </button>
+                    <Link href="/shop/search">
+                        <button className="mt-6 px-8 py-2 border border-green hover:bg-green hover:text-cream transition-colors duration-300">
+                            Explore Now
+                        </button>
+                    </Link>
                 </section>
             </div>
         </ShopLayout>
