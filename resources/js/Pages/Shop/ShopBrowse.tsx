@@ -19,137 +19,9 @@ import {
 } from "@heroicons/react/24/outline";
 import { ChevronDownIcon, PlusIcon } from "@heroicons/react/20/solid";
 import ShopLayout from "@/Layouts/ShopLayout";
+import { useTrail, useTransition, animated } from "@react-spring/web";
+import { Link } from "@inertiajs/react";
 
-const navigation = {
-    categories: [
-        {
-            id: "women",
-            name: "Women",
-            featured: [
-                {
-                    name: "New Arrivals",
-                    href: "#",
-                    imageSrc:
-                        "https://tailwindcss.com/plus-assets/img/ecommerce-images/mega-menu-category-01.jpg",
-                    imageAlt:
-                        "Models sitting back to back, wearing Basic Tee in black and bone.",
-                },
-                {
-                    name: "Basic Tees",
-                    href: "#",
-                    imageSrc:
-                        "https://tailwindcss.com/plus-assets/img/ecommerce-images/mega-menu-category-02.jpg",
-                    imageAlt:
-                        "Close up of Basic Tee fall bundle with off-white, ochre, olive, and black tees.",
-                },
-            ],
-            sections: [
-                {
-                    id: "clothing",
-                    name: "Clothing",
-                    items: [
-                        { name: "Tops", href: "#" },
-                        { name: "Dresses", href: "#" },
-                        { name: "Pants", href: "#" },
-                        { name: "Denim", href: "#" },
-                        { name: "Sweaters", href: "#" },
-                        { name: "T-Shirts", href: "#" },
-                        { name: "Jackets", href: "#" },
-                        { name: "Activewear", href: "#" },
-                        { name: "Browse All", href: "#" },
-                    ],
-                },
-                {
-                    id: "accessories",
-                    name: "Accessories",
-                    items: [
-                        { name: "Watches", href: "#" },
-                        { name: "Wallets", href: "#" },
-                        { name: "Bags", href: "#" },
-                        { name: "Sunglasses", href: "#" },
-                        { name: "Hats", href: "#" },
-                        { name: "Belts", href: "#" },
-                    ],
-                },
-                {
-                    id: "brands",
-                    name: "Brands",
-                    items: [
-                        { name: "Full Nelson", href: "#" },
-                        { name: "My Way", href: "#" },
-                        { name: "Re-Arranged", href: "#" },
-                        { name: "Counterfeit", href: "#" },
-                        { name: "Significant Other", href: "#" },
-                    ],
-                },
-            ],
-        },
-        {
-            id: "men",
-            name: "Men",
-            featured: [
-                {
-                    name: "New Arrivals",
-                    href: "#",
-                    imageSrc:
-                        "https://tailwindcss.com/plus-assets/img/ecommerce-images/product-page-04-detail-product-shot-01.jpg",
-                    imageAlt:
-                        "Drawstring top with elastic loop closure and textured interior padding.",
-                },
-                {
-                    name: "Artwork Tees",
-                    href: "#",
-                    imageSrc:
-                        "https://tailwindcss.com/plus-assets/img/ecommerce-images/category-page-02-image-card-06.jpg",
-                    imageAlt:
-                        "Three shirts in gray, white, and blue arranged on table with same line drawing of hands and shapes overlapping on front of shirt.",
-                },
-            ],
-            sections: [
-                {
-                    id: "clothing",
-                    name: "Clothing",
-                    items: [
-                        { name: "Tops", href: "#" },
-                        { name: "Pants", href: "#" },
-                        { name: "Sweaters", href: "#" },
-                        { name: "T-Shirts", href: "#" },
-                        { name: "Jackets", href: "#" },
-                        { name: "Activewear", href: "#" },
-                        { name: "Browse All", href: "#" },
-                    ],
-                },
-                {
-                    id: "accessories",
-                    name: "Accessories",
-                    items: [
-                        { name: "Watches", href: "#" },
-                        { name: "Wallets", href: "#" },
-                        { name: "Bags", href: "#" },
-                        { name: "Sunglasses", href: "#" },
-                        { name: "Hats", href: "#" },
-                        { name: "Belts", href: "#" },
-                    ],
-                },
-                {
-                    id: "brands",
-                    name: "Brands",
-                    items: [
-                        { name: "Re-Arranged", href: "#" },
-                        { name: "Counterfeit", href: "#" },
-                        { name: "Full Nelson", href: "#" },
-                        { name: "My Way", href: "#" },
-                    ],
-                },
-            ],
-        },
-    ],
-    pages: [
-        { name: "Company", href: "#" },
-        { name: "Stores", href: "#" },
-    ],
-};
-const breadcrumbs = [{ id: 1, name: "Men", href: "#" }];
 const filters = [
     {
         id: "category",
@@ -159,29 +31,39 @@ const filters = [
             { value: "sweaters", label: "Sweaters" },
             { value: "hats", label: "Hats" },
             { value: "gloves", label: "Gloves" },
-            { value: "miscellaneous", label: "Miscelleaneous" },
+            { value: "miscellaneous", label: "Miscellaneous" },
+        ],
+    },
+    {
+        id: "age",
+        name: "Age",
+        options: [
+            { value: "babies", label: "Babies" },
+            { value: "children", label: "Children" },
+            { value: "adults", label: "Adults" },
         ],
     },
 ];
 const products = [
     {
         id: 1,
-        name: "Basic Tee 8-Pack",
+        name: "Winter Scarf",
         href: "#",
-        price: "$256",
-        description:
-            "Get the full lineup of our Basic Tees. Have a fresh shirt all week, and an extra for laundry day.",
-        options: "8 colors",
+        price: "$45",
+        description: "Warm and comfortable winter scarf.",
+        category: "scarves",
+        age: "adults",
         imageSrc:
-            "https://tailwindcss.com/plus-assets/img/ecommerce-images/category-page-02-image-card-01.jpg",
-        imageAlt:
-            "Eight shirts arranged on table in black, olive, grey, blue, white, red, mustard, and green.",
+            "https://plus.unsplash.com/premium_photo-1668430856694-62c7753fb03b?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        imageAlt: "Product image",
     },
     {
         id: 2,
         name: "Basic Tee",
         href: "#",
         price: "$32",
+        category: "gloves",
+        age: "babies",
         description:
             "Look like a visionary CEO and wear the same black t-shirt every day.",
         options: "Black",
@@ -189,42 +71,82 @@ const products = [
             "https://tailwindcss.com/plus-assets/img/ecommerce-images/category-page-02-image-card-02.jpg",
         imageAlt: "Front of plain black t-shirt.",
     },
-    // More products...
+    {
+        id: 3,
+        name: "Test 3",
+        href: "#",
+        price: "$16",
+        category: "gloves",
+        age: "babies",
+        description:
+            "Look like a visionary CEO and wear the same black t-shirt every day.",
+        options: "Black",
+        imageSrc:
+            "https://tailwindcss.com/plus-assets/img/ecommerce-images/category-page-02-image-card-02.jpg",
+        imageAlt: "Front of plain black t-shirt.",
+    },
 ];
-const footerNavigation = {
-    products: [
-        { name: "Bags", href: "#" },
-        { name: "Tees", href: "#" },
-        { name: "Objects", href: "#" },
-        { name: "Home Goods", href: "#" },
-        { name: "Accessories", href: "#" },
-    ],
-    company: [
-        { name: "Who we are", href: "#" },
-        { name: "Sustainability", href: "#" },
-        { name: "Press", href: "#" },
-        { name: "Careers", href: "#" },
-        { name: "Terms & Conditions", href: "#" },
-        { name: "Privacy", href: "#" },
-    ],
-    customerService: [
-        { name: "Contact", href: "#" },
-        { name: "Shipping", href: "#" },
-        { name: "Returns", href: "#" },
-        { name: "Warranty", href: "#" },
-        { name: "Secure Payments", href: "#" },
-        { name: "FAQ", href: "#" },
-        { name: "Find a store", href: "#" },
-    ],
-};
 
 export default function ShopBrowse() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+    const [selectedFilters, setSelectedFilters] = useState({
+        category: [] as string[],
+        age: [] as string[],
+    });
+    const [filteredProducts, setFilteredProducts] = useState(products);
+
+    const transitions = useTransition(filteredProducts, {
+        keys: (product) => product.id,
+        from: { opacity: 0, transform: "translate3d(0,-40px,0)" },
+        enter: { opacity: 1, transform: "translate3d(0,0px,0)" },
+        trail: 200,
+    });
+
+    const updateFilters = (
+        checked: boolean,
+        value: string,
+        filterType: keyof typeof selectedFilters
+    ) => {
+        const newFilters = { ...selectedFilters };
+
+        if (checked) {
+            newFilters[filterType] = [...newFilters[filterType], value];
+        } else {
+            newFilters[filterType] = newFilters[filterType].filter(
+                (val) => val !== value
+            );
+        }
+
+        setSelectedFilters(newFilters);
+        applyFilters(newFilters);
+    };
+
+    const applyFilters = (filters: { category: string[]; age: string[] }) => {
+        const noFiltersSelected = Object.values(filters).every(
+            (filterArray) => filterArray.length === 0
+        );
+
+        if (noFiltersSelected) {
+            setFilteredProducts(products);
+            return;
+        }
+
+        const filtered = products.filter((product) => {
+            const categoryMatch =
+                filters.category.length === 0 ||
+                filters.category.includes(product.category);
+            const ageMatch =
+                filters.age.length === 0 || filters.age.includes(product.age);
+            return categoryMatch && ageMatch;
+        });
+
+        setFilteredProducts(filtered);
+    };
 
     return (
         <ShopLayout>
-            <div className="bg-beige font-sans">
+            <div className="min-h-svh bg-beige font-sans">
                 <div>
                     {/* Mobile menu */}
                     <Dialog
@@ -258,124 +180,6 @@ export default function ShopBrowse() {
                                         />
                                     </button>
                                 </div>
-
-                                {/* Links */}
-                                <TabGroup className="mt-2">
-                                    <div className="border-b border-gray-200">
-                                        <TabList className="-mb-px flex space-x-8 px-4">
-                                            {navigation.categories.map(
-                                                (category) => (
-                                                    <Tab
-                                                        key={category.name}
-                                                        className="flex-1 whitespace-nowrap border-b-2 border-transparent px-1 py-4 text-base font-medium text-gray-900 data-[selected]:border-indigo-600 data-[selected]:text-indigo-600"
-                                                    >
-                                                        {category.name}
-                                                    </Tab>
-                                                )
-                                            )}
-                                        </TabList>
-                                    </div>
-                                    <TabPanels as={Fragment}>
-                                        {navigation.categories.map(
-                                            (category) => (
-                                                <TabPanel
-                                                    key={category.name}
-                                                    className="space-y-10 px-4 pb-8 pt-10"
-                                                >
-                                                    <div className="grid grid-cols-2 gap-x-4">
-                                                        {category.featured.map(
-                                                            (item) => (
-                                                                <div
-                                                                    key={
-                                                                        item.name
-                                                                    }
-                                                                    className="group relative text-sm"
-                                                                >
-                                                                    <img
-                                                                        alt={
-                                                                            item.imageAlt
-                                                                        }
-                                                                        src={
-                                                                            item.imageSrc
-                                                                        }
-                                                                        className="aspect-square w-full rounded-lg bg-gray-100 object-cover group-hover:opacity-75"
-                                                                    />
-                                                                    <a
-                                                                        href={
-                                                                            item.href
-                                                                        }
-                                                                        className="mt-6 block font-medium text-gray-900"
-                                                                    >
-                                                                        <span
-                                                                            aria-hidden="true"
-                                                                            className="absolute inset-0 z-10"
-                                                                        />
-                                                                        {
-                                                                            item.name
-                                                                        }
-                                                                    </a>
-                                                                    <p
-                                                                        aria-hidden="true"
-                                                                        className="mt-1"
-                                                                    >
-                                                                        Shop now
-                                                                    </p>
-                                                                </div>
-                                                            )
-                                                        )}
-                                                    </div>
-                                                    {category.sections.map(
-                                                        (section) => (
-                                                            <div
-                                                                key={
-                                                                    section.name
-                                                                }
-                                                            >
-                                                                <p
-                                                                    id={`${category.id}-${section.id}-heading-mobile`}
-                                                                    className="font-medium text-gray-900"
-                                                                >
-                                                                    {
-                                                                        section.name
-                                                                    }
-                                                                </p>
-                                                                <ul
-                                                                    role="list"
-                                                                    aria-labelledby={`${category.id}-${section.id}-heading-mobile`}
-                                                                    className="mt-6 flex flex-col space-y-6"
-                                                                >
-                                                                    {section.items.map(
-                                                                        (
-                                                                            item
-                                                                        ) => (
-                                                                            <li
-                                                                                key={
-                                                                                    item.name
-                                                                                }
-                                                                                className="flow-root"
-                                                                            >
-                                                                                <a
-                                                                                    href={
-                                                                                        item.href
-                                                                                    }
-                                                                                    className="-m-2 block p-2 text-gray-500"
-                                                                                >
-                                                                                    {
-                                                                                        item.name
-                                                                                    }
-                                                                                </a>
-                                                                            </li>
-                                                                        )
-                                                                    )}
-                                                                </ul>
-                                                            </div>
-                                                        )
-                                                    )}
-                                                </TabPanel>
-                                            )
-                                        )}
-                                    </TabPanels>
-                                </TabGroup>
                             </DialogPanel>
                         </div>
                     </Dialog>
@@ -465,31 +269,18 @@ export default function ShopBrowse() {
                                                                                 name={`${section.id}[]`}
                                                                                 type="checkbox"
                                                                                 className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                                                                                onChange={(
+                                                                                    e
+                                                                                ) =>
+                                                                                    updateFilters(
+                                                                                        e
+                                                                                            .target
+                                                                                            .checked,
+                                                                                        option.value,
+                                                                                        section.id as keyof typeof selectedFilters
+                                                                                    )
+                                                                                }
                                                                             />
-                                                                            <svg
-                                                                                fill="none"
-                                                                                viewBox="0 0 14 14"
-                                                                                className="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25"
-                                                                            >
-                                                                                <path
-                                                                                    d="M3 8L6 11L11 3.5"
-                                                                                    strokeWidth={
-                                                                                        2
-                                                                                    }
-                                                                                    strokeLinecap="round"
-                                                                                    strokeLinejoin="round"
-                                                                                    className="opacity-0 group-has-[:checked]:opacity-100"
-                                                                                />
-                                                                                <path
-                                                                                    d="M3 7H11"
-                                                                                    strokeWidth={
-                                                                                        2
-                                                                                    }
-                                                                                    strokeLinecap="round"
-                                                                                    strokeLinejoin="round"
-                                                                                    className="opacity-0 group-has-[:indeterminate]:opacity-100"
-                                                                                />
-                                                                            </svg>
                                                                         </div>
                                                                     </div>
                                                                     <label
@@ -527,8 +318,9 @@ export default function ShopBrowse() {
                             </form>
                         </div>
 
-                        <div className="pb-24 pt-12 lg:grid lg:grid-cols-3 lg:gap-x-8 xl:grid-cols-4">
-                            <aside>
+                        <div className="pb-24 pt-12 lg:grid lg:grid-cols-4 lg:gap-x-8">
+                            {/* Filters section - takes 1 column */}
+                            <div className="lg:col-span-1">
                                 <h2 className="sr-only">Filters</h2>
 
                                 <button
@@ -546,11 +338,15 @@ export default function ShopBrowse() {
                                 </button>
 
                                 <div className="hidden lg:block">
-                                    <form className="divide-y divide-gray-200">
-                                        {filters.map((section) => (
+                                    <form className="space-y-10 divide-y divide-gray-200">
+                                        {filters.map((section, sectionIdx) => (
                                             <div
                                                 key={section.name}
-                                                className="py-10 first:pt-0 last:pb-0"
+                                                className={
+                                                    sectionIdx === 0
+                                                        ? undefined
+                                                        : "pt-10"
+                                                }
                                             >
                                                 <fieldset>
                                                     <legend className="block text-sm font-medium text-gray-900">
@@ -578,6 +374,17 @@ export default function ShopBrowse() {
                                                                                 name={`${section.id}[]`}
                                                                                 type="checkbox"
                                                                                 className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                                                                                onChange={(
+                                                                                    e
+                                                                                ) =>
+                                                                                    updateFilters(
+                                                                                        e
+                                                                                            .target
+                                                                                            .checked,
+                                                                                        option.value,
+                                                                                        section.id as keyof typeof selectedFilters
+                                                                                    )
+                                                                                }
                                                                             />
                                                                             <svg
                                                                                 fill="none"
@@ -607,7 +414,7 @@ export default function ShopBrowse() {
                                                                     </div>
                                                                     <label
                                                                         htmlFor={`${section.id}-${optionIdx}`}
-                                                                        className="text-sm text-gray-600"
+                                                                        className="text-sm text-gray-500"
                                                                     >
                                                                         {
                                                                             option.label
@@ -622,53 +429,61 @@ export default function ShopBrowse() {
                                         ))}
                                     </form>
                                 </div>
-                            </aside>
+                            </div>
 
-                            <section
-                                aria-labelledby="product-heading"
-                                className="mt-6 lg:col-span-2 lg:mt-0 xl:col-span-3"
-                            >
-                                <h2 id="product-heading" className="sr-only">
-                                    Products
-                                </h2>
-
-                                <div className="grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:gap-x-8 xl:grid-cols-3">
-                                    {products.map((product) => (
-                                        <div
-                                            key={product.id}
-                                            className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white"
-                                        >
-                                            <img
-                                                alt={product.imageAlt}
-                                                src={product.imageSrc}
-                                                className="aspect-[3/4] bg-gray-200 object-cover group-hover:opacity-75 sm:h-96"
-                                            />
-                                            <div className="flex flex-1 flex-col space-y-2 p-4">
-                                                <h3 className="text-sm font-medium text-gray-900">
-                                                    <a href={product.href}>
-                                                        <span
-                                                            aria-hidden="true"
-                                                            className="absolute inset-0"
+                            {/* Products section - takes 4 columns */}
+                            <div className="lg:col-span-3">
+                                {filteredProducts.length === 0 ? (
+                                    <div className="flex items-center justify-center h-full py-56">
+                                        <p className="text-lg text-gray-500">
+                                            No products available that fit your
+                                            description.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:gap-x-8 xl:grid-cols-3">
+                                        {transitions((style, product) => (
+                                            <Link
+                                                href={product.href}
+                                                as="a"
+                                                key={product.id}
+                                            >
+                                                <animated.div
+                                                    style={style}
+                                                    className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white"
+                                                >
+                                                    <div className="aspect-h-4 aspect-w-3 bg-gray-200 sm:aspect-none group-hover:opacity-75 sm:h-96">
+                                                        <img
+                                                            src={
+                                                                product.imageSrc
+                                                            }
+                                                            alt={
+                                                                product.imageAlt
+                                                            }
+                                                            className="h-full w-full object-cover object-center"
                                                         />
-                                                        {product.name}
-                                                    </a>
-                                                </h3>
-                                                <p className="text-sm text-gray-500">
-                                                    {product.description}
-                                                </p>
-                                                <div className="flex flex-1 flex-col justify-end">
-                                                    <p className="text-sm italic text-gray-500">
-                                                        {product.options}
-                                                    </p>
-                                                    <p className="text-base font-medium text-gray-900">
-                                                        {product.price}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </section>
+                                                    </div>
+                                                    <div className="flex flex-1 flex-col space-y-2 p-4">
+                                                        <h3 className="text-sm font-medium text-gray-900">
+                                                            {product.name}
+                                                        </h3>
+                                                        <p className="text-sm text-gray-500 line-clamp-2 h-12 overflow-hidden">
+                                                            {
+                                                                product.description
+                                                            }
+                                                        </p>
+                                                        <div className="flex flex-1 flex-col justify-end">
+                                                            <p className="text-base font-medium text-gray-900">
+                                                                {product.price}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </animated.div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </main>
                 </div>

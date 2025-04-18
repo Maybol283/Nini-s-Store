@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CartController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -19,4 +20,13 @@ Route::get('/shop', function () {
 
 Route::get('/shop/search', function () {
     return Inertia::render('Shop/ShopBrowse');
+});
+
+Route::middleware(['web'])->group(function () {
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::delete('/cart/remove/{cartItemId}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::patch('/cart/update/{cartItemId}', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    Route::get('/cart/summary', [CartController::class, 'summary'])->name('cart.summary');
 });
