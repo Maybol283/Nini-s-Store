@@ -1,5 +1,6 @@
 import { ShoppingBagIcon } from "@heroicons/react/24/outline";
 import { Link, usePage, router } from "@inertiajs/react";
+import { PageProps as InertiaPageProps } from "@inertiajs/core";
 import React, { useState, useEffect, Fragment } from "react";
 import { Popover, Transition } from "@headlessui/react";
 import { cartStorage } from "@/Utils/cartStorage";
@@ -17,14 +18,15 @@ interface CartItem {
     category: string;
 }
 
-interface PageProps {
+interface SharedPageProps {
     cart: {
         items: { [key: string]: CartItem };
         total: number;
         itemCount: number;
     };
-    [key: string]: any;
 }
+
+type PageProps = InertiaPageProps & SharedPageProps;
 
 const Header = () => {
     const { cart } = usePage<PageProps>().props;
@@ -195,7 +197,7 @@ const Header = () => {
                                                         className="flex items-center py-6"
                                                     >
                                                         <Link
-                                                            href={`/shop/${product.category}/${product.name}`}
+                                                            href={`/shop/item/${product.product_id}`}
                                                         >
                                                             <div className="flex place-around pb-4">
                                                                 <div className="h-16 w-16 flex-none rounded-md border border-gray-200">

@@ -53,7 +53,11 @@ export const useCartStorage = () => {
             Object.keys(localCart.items).length > 0 &&
             Object.keys(serverCart.items).length === 0
         ) {
-            router.post("/cart/sync", localCart);
+            router.post("/cart/sync", {
+                items: JSON.stringify(localCart.items),
+                total: localCart.total,
+                itemCount: localCart.itemCount,
+            });
             return;
         }
 

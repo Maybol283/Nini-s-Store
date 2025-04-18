@@ -19,7 +19,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { ChevronDownIcon, PlusIcon } from "@heroicons/react/20/solid";
 import ShopLayout from "@/Layouts/ShopLayout";
-import { useTrail, useTransition, animated } from "@react-spring/web";
+import { useTrail, useTransition, a } from "@react-spring/web";
 import { Link } from "@inertiajs/react";
 
 const filters = [
@@ -444,11 +444,9 @@ export default function ShopBrowse() {
                                     <div className="grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:gap-x-8 xl:grid-cols-3">
                                         {transitions((style, product) => (
                                             <Link
-                                                href={product.href}
-                                                as="a"
-                                                key={product.id}
+                                                href={`/shop/item/${product.id}`}
                                             >
-                                                <animated.div
+                                                <a.div
                                                     style={style}
                                                     className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white"
                                                 >
@@ -478,7 +476,7 @@ export default function ShopBrowse() {
                                                             </p>
                                                         </div>
                                                     </div>
-                                                </animated.div>
+                                                </a.div>
                                             </Link>
                                         ))}
                                     </div>
