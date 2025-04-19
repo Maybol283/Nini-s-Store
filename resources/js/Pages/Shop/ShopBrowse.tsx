@@ -21,79 +21,100 @@ import { ChevronDownIcon, PlusIcon } from "@heroicons/react/20/solid";
 import ShopLayout from "@/Layouts/ShopLayout";
 import { useTrail, useTransition, a } from "@react-spring/web";
 import { Link } from "@inertiajs/react";
+import { Product } from "@/types";
+
+interface Props {
+    ageGroup: "adult" | "baby";
+}
+
+const categories = [
+    { value: "scarves", label: "Scarves" },
+    { value: "sweaters", label: "Sweaters" },
+    { value: "hats", label: "Hats" },
+    { value: "gloves", label: "Gloves" },
+    { value: "miscellaneous", label: "Miscellaneous" },
+];
+
+const sizes = {
+    adult: [
+        { value: "S", label: "S" },
+        { value: "M", label: "M" },
+        { value: "L", label: "L" },
+        { value: "XL", label: "XL" },
+    ],
+    baby: [
+        { value: "0-3", label: "0-3 Months" },
+        { value: "3-6", label: "3-6 Months" },
+        { value: "6-9", label: "6-9 Months" },
+        { value: "9-12", label: "9-12 Months" },
+        { value: "12-18", label: "12-18 Months" },
+        { value: "18-24", label: "18-24 Months" },
+    ],
+};
 
 const filters = [
     {
         id: "category",
         name: "Category",
-        options: [
-            { value: "scarves", label: "Scarves" },
-            { value: "sweaters", label: "Sweaters" },
-            { value: "hats", label: "Hats" },
-            { value: "gloves", label: "Gloves" },
-            { value: "miscellaneous", label: "Miscellaneous" },
-        ],
+        options: categories,
     },
     {
-        id: "age",
-        name: "Age",
-        options: [
-            { value: "babies", label: "Babies" },
-            { value: "children", label: "Children" },
-            { value: "adults", label: "Adults" },
-        ],
-    },
-];
-const products = [
-    {
-        id: 1,
-        name: "Winter Scarf",
-        href: "#",
-        price: "$45",
-        description: "Warm and comfortable winter scarf.",
-        category: "scarves",
-        age: "adults",
-        imageSrc:
-            "https://plus.unsplash.com/premium_photo-1668430856694-62c7753fb03b?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        imageAlt: "Product image",
-    },
-    {
-        id: 2,
-        name: "Basic Tee",
-        href: "#",
-        price: "$32",
-        category: "gloves",
-        age: "babies",
-        description:
-            "Look like a visionary CEO and wear the same black t-shirt every day.",
-        options: "Black",
-        imageSrc:
-            "https://tailwindcss.com/plus-assets/img/ecommerce-images/category-page-02-image-card-02.jpg",
-        imageAlt: "Front of plain black t-shirt.",
-    },
-    {
-        id: 3,
-        name: "Test 3",
-        href: "#",
-        price: "$16",
-        category: "gloves",
-        age: "babies",
-        description:
-            "Look like a visionary CEO and wear the same black t-shirt every day.",
-        options: "Black",
-        imageSrc:
-            "https://tailwindcss.com/plus-assets/img/ecommerce-images/category-page-02-image-card-02.jpg",
-        imageAlt: "Front of plain black t-shirt.",
+        id: "size",
+        name: "Size",
+        options: [], // Will be populated based on age group
     },
 ];
 
-export default function ShopBrowse() {
+const products: Product[] = [
+    {
+        id: 1,
+        name: "Winter Scarf",
+        description: "Warm and comfortable winter scarf.",
+        price: "$45",
+        category: "scarves",
+        age_group: "adult",
+        sizes: ["S", "M", "L", "XL"],
+        images: [
+            {
+                imageSrc:
+                    "https://plus.unsplash.com/premium_photo-1668430856694-62c7753fb03b?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                imageAlt: "Product image",
+            },
+        ],
+        in_stock: true,
+        stock_quantity: 10,
+    },
+    {
+        id: 2,
+        name: "Baby Hat",
+        description: "Soft and cozy baby hat.",
+        price: "$25",
+        category: "hats",
+        age_group: "baby",
+        sizes: ["0-3", "3-6", "6-9"],
+        images: [
+            {
+                imageSrc:
+                    "https://tailwindcss.com/plus-assets/img/ecommerce-images/category-page-02-image-card-02.jpg",
+                imageAlt: "Baby hat image",
+            },
+        ],
+        in_stock: true,
+        stock_quantity: 15,
+    },
+];
+
+export default function ShopBrowse({ ageGroup }: Props) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState({
         category: [] as string[],
-        age: [] as string[],
+        size: [] as string[],
     });
+
+    // Set the appropriate size options based on age group
+    filters[1].options = sizes[ageGroup];
+
     const [filteredProducts, setFilteredProducts] = useState(products);
 
     const transitions = useTransition(filteredProducts, {
@@ -122,13 +143,15 @@ export default function ShopBrowse() {
         applyFilters(newFilters);
     };
 
-    const applyFilters = (filters: { category: string[]; age: string[] }) => {
+    const applyFilters = (filters: { category: string[]; size: string[] }) => {
         const noFiltersSelected = Object.values(filters).every(
             (filterArray) => filterArray.length === 0
         );
 
         if (noFiltersSelected) {
-            setFilteredProducts(products);
+            setFilteredProducts(
+                products.filter((p) => p.age_group === ageGroup)
+            );
             return;
         }
 
@@ -136,9 +159,11 @@ export default function ShopBrowse() {
             const categoryMatch =
                 filters.category.length === 0 ||
                 filters.category.includes(product.category);
-            const ageMatch =
-                filters.age.length === 0 || filters.age.includes(product.age);
-            return categoryMatch && ageMatch;
+            const sizeMatch =
+                filters.size.length === 0 ||
+                filters.size.some((size) => product.sizes.includes(size));
+            const ageMatch = product.age_group === ageGroup;
+            return categoryMatch && sizeMatch && ageMatch;
         });
 
         setFilteredProducts(filtered);
@@ -453,10 +478,14 @@ export default function ShopBrowse() {
                                                     <div className="aspect-h-4 aspect-w-3 bg-gray-200 sm:aspect-none group-hover:opacity-75 sm:h-96">
                                                         <img
                                                             src={
-                                                                product.imageSrc
+                                                                product
+                                                                    .images[0]
+                                                                    .imageSrc
                                                             }
                                                             alt={
-                                                                product.imageAlt
+                                                                product
+                                                                    .images[0]
+                                                                    .imageAlt
                                                             }
                                                             className="h-full w-full object-cover object-center"
                                                         />

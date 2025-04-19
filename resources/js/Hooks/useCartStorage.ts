@@ -19,7 +19,7 @@ interface Cart {
     itemCount: number;
 }
 
-const CART_STORAGE_KEY = "knitted_with_love_cart";
+const CART_STORAGE_KEY = "crocheted_with_love_cart";
 
 export const useCartStorage = () => {
     const getStoredCart = (): Cart => {

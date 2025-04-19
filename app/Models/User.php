@@ -47,8 +47,9 @@ class User extends Authenticatable
         ];
     }
 
-    public function tokenCan($ability)
+
+    public function isAdmin(): bool
     {
-        return $this->email === 'admin@example.com'; // You can modify this logic
+        return $this->role === 'admin' || $this->email === 'admin@example.com';
     }
 }

@@ -19,6 +19,15 @@ Route::get('/shop', function () {
     return Inertia::render('Shop/ShopLandingPage');
 });
 
+Route::get('/shop/{age_group}', function (string $age_group) {
+    if (!in_array($age_group, ['adult', 'baby'])) {
+        abort(404);
+    }
+    return Inertia::render('Shop/ShopBrowse', [
+        'ageGroup' => $age_group
+    ]);
+})->where('age_group', 'adult|baby');
+
 Route::get('/shop/search', function () {
     return Inertia::render('Shop/ShopBrowse');
 });
