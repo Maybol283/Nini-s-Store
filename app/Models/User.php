@@ -22,6 +22,13 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'phone',
+        'address_line1',
+        'address_line2',
+        'city',
+        'postal_code',
+        'country'
     ];
 
     /**
@@ -50,6 +57,16 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin' || $this->email === 'admin@example.com';
+        return $this->role === 'admin';
+    }
+
+    public function cart()
+    {
+        return $this->hasOne(Cart::class)->latest();
+    }
+
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
     }
 }
