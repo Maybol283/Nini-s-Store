@@ -15,10 +15,9 @@ return new class extends Migration
             $table->decimal('price', 8, 2);
             $table->enum('category', ['scarves', 'sweaters', 'hats', 'gloves', 'miscellaneous']);
             $table->enum('age_group', ['adult', 'baby']);
-            $table->json('sizes'); // Will contain either adult or baby sizes based on age_group
+            $table->string('size',); // Will contain either adult or baby sizes based on age_group
             $table->json('images'); // Array of image objects with src and alt
             $table->boolean('in_stock')->default(true);
-            $table->integer('stock_quantity')->default(0);
             $table->timestamps();
             $table->softDeletes(); // For product archiving
         });
