@@ -4,12 +4,40 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\ShopController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
+
+// Share cart data with all Inertia responses
+Inertia::share('cart', function () {
+    if (session()->has('cart')) {
+        return session('cart');
+    }
+
+    return [
+        'items' => [],
+        'total' => 0,
+        'itemCount' => 0,
+    ];
+});
+
+// Share auth data with all Inertia responses
+Inertia::share('auth', function () {
+    return [
+        'user' => Auth::user() ? [
+            'id' => Auth::user()->id,
+            'name' => Auth::user()->name,
+            'email' => Auth::user()->email,
+        ] : null,
+    ];
+});
 
 Route::get('/', function () {
-    return Inertia::render('Dashboard', [
+    return Inertia::render('LandingPage', [
         'message' => 'Welcome to the About Us page!',
     ]);
 });
+
+// Include Auth routes
+require __DIR__ . '/auth.php';
 
 Route::get('/size-guide', function () {
     return Inertia::render('SizeGuide');

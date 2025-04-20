@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="scroll-smooth size-screen modak">
+<html class="scroll-smooth size-screen font-modak">
 
 <head>
     <meta charset="utf-8">

@@ -19,7 +19,7 @@ interface CartItem {
 }
 
 interface SharedPageProps {
-    cart: {
+    cart?: {
         items: { [key: string]: CartItem };
         total: number;
         itemCount: number;
@@ -29,7 +29,10 @@ interface SharedPageProps {
 type PageProps = InertiaPageProps & SharedPageProps;
 
 const Header = () => {
-    const { cart } = usePage<PageProps>().props;
+    const { cart: serverCart } = usePage<PageProps>().props;
+
+    // Provide default empty cart if serverCart is undefined
+    const cart = serverCart || { items: {}, total: 0, itemCount: 0 };
     const cartItems = Object.values(cart.items);
 
     // When activeDropdown is 0, no dropdown is open.
