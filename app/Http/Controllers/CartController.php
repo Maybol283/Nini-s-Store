@@ -86,4 +86,33 @@ class CartController extends Controller
     {
         return response()->json($this->cartService->getCartSummary());
     }
+
+    /**
+     * Sync cart from client storage to session
+     */
+    public function sync(Request $request)
+    {
+        $request->validate([
+            'items' => 'required|string',
+            'total' => 'required|numeric',
+            'itemCount' => 'required|integer',
+        ]);
+
+        try {
+            $items = json_decode($request->items, true);
+
+            // Store in session
+            session()->put('cart', $items);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cart synchronized successfully',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to synchronize cart',
+            ], 500);
+        }
+    }
 }

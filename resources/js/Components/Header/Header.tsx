@@ -2,7 +2,7 @@ import { ShoppingBagIcon } from "@heroicons/react/24/outline";
 import { Link, usePage, router } from "@inertiajs/react";
 import { PageProps as InertiaPageProps } from "@inertiajs/core";
 import React, { useState, useEffect, Fragment } from "react";
-import { Popover, Transition } from "@headlessui/react";
+import { Popover, Transition, Menu } from "@headlessui/react";
 import { cartStorage } from "@/Utils/cartStorage";
 
 interface CartItem {
@@ -18,18 +18,28 @@ interface CartItem {
     category: string;
 }
 
+interface Auth {
+    user: {
+        id: number;
+        name: string;
+        email: string;
+    } | null;
+}
+
 interface SharedPageProps {
     cart?: {
         items: { [key: string]: CartItem };
         total: number;
         itemCount: number;
     };
+    auth: Auth;
 }
 
 type PageProps = InertiaPageProps & SharedPageProps;
 
 const Header = () => {
-    const { cart: serverCart } = usePage<PageProps>().props;
+    const { cart: serverCart, auth } = usePage<PageProps>().props;
+    const user = auth.user;
 
     // Provide default empty cart if serverCart is undefined
     const cart = serverCart || { items: {}, total: 0, itemCount: 0 };
@@ -40,6 +50,10 @@ const Header = () => {
     const [activeDropdown, setActiveDropdown] = useState<number>(0);
     // Controls whether the dropdown element should be rendered.
     const [showDropdown, setShowDropdown] = useState(false);
+
+    const handleLogout = () => {
+        router.post("/logout");
+    };
 
     useEffect(() => {
         // Sync cart with localStorage whenever server cart changes
@@ -164,6 +178,80 @@ const Header = () => {
                                 )}
                             </div>
                         </li>
+                        {/* Auth links */}
+                        {user ? (
+                            <li className="relative">
+                                <Menu
+                                    as="div"
+                                    className="relative inline-block text-left"
+                                >
+                                    <div>
+                                        <Menu.Button className="inline-flex justify-center w-full hover:text-pink-400 text-outline-green font-medium">
+                                            {user.name}
+                                        </Menu.Button>
+                                    </div>
+                                    <Transition
+                                        as={Fragment}
+                                        enter="transition ease-out duration-100"
+                                        enterFrom="transform opacity-0 scale-95"
+                                        enterTo="transform opacity-100 scale-100"
+                                        leave="transition ease-in duration-75"
+                                        leaveFrom="transform opacity-100 scale-100"
+                                        leaveTo="transform opacity-0 scale-95"
+                                    >
+                                        <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                            <Menu.Item>
+                                                {({ active }) => (
+                                                    <Link
+                                                        href="/dashboard"
+                                                        className={`${
+                                                            active
+                                                                ? "bg-gray-100"
+                                                                : ""
+                                                        } block px-4 py-2 text-sm text-gray-700`}
+                                                    >
+                                                        Dashboard
+                                                    </Link>
+                                                )}
+                                            </Menu.Item>
+                                            <Menu.Item>
+                                                {({ active }) => (
+                                                    <button
+                                                        onClick={handleLogout}
+                                                        className={`${
+                                                            active
+                                                                ? "bg-gray-100"
+                                                                : ""
+                                                        } block w-full text-left px-4 py-2 text-sm text-gray-700`}
+                                                    >
+                                                        Log out
+                                                    </button>
+                                                )}
+                                            </Menu.Item>
+                                        </Menu.Items>
+                                    </Transition>
+                                </Menu>
+                            </li>
+                        ) : (
+                            <>
+                                <li>
+                                    <Link
+                                        href="/login"
+                                        className="hover:text-pink-400 text-outline-green"
+                                    >
+                                        Login
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href="/register"
+                                        className="hover:text-pink-400 text-outline-green"
+                                    >
+                                        Register
+                                    </Link>
+                                </li>
+                            </>
+                        )}
                         <li>
                             <Popover className="relative flex items-center">
                                 <Popover.Button className="group flex items-center p-2">

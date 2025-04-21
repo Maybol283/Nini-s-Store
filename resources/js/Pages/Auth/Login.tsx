@@ -5,6 +5,7 @@ import MainLayout from "@/Layouts/MainLayout";
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [remember, setRemember] = useState(false);
     const [errors, setErrors] = useState<{ email?: string; password?: string }>(
         {}
     );
@@ -16,7 +17,7 @@ const Login = () => {
 
         router.post(
             "/login",
-            { email, password },
+            { email, password, remember },
             {
                 onSuccess: () => {
                     setProcessing(false);
@@ -30,7 +31,7 @@ const Login = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen bg-cream">
+        <div className="flex items-center justify-center w-screen h-screen bg-cream">
             <Head title="Login" />
 
             <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
@@ -88,6 +89,8 @@ const Login = () => {
                             <input
                                 id="remember"
                                 type="checkbox"
+                                checked={remember}
+                                onChange={(e) => setRemember(e.target.checked)}
                                 className="h-4 w-4 text-green focus:ring-green border-gray-300 rounded"
                             />
                             <label
@@ -106,6 +109,18 @@ const Login = () => {
                     >
                         {processing ? "Logging in..." : "Log in"}
                     </button>
+
+                    <div className="mt-4 text-center">
+                        <p className="text-sm text-gray-600">
+                            Don't have an account?{" "}
+                            <Link
+                                href="/register"
+                                className="text-green hover:underline"
+                            >
+                                Register
+                            </Link>
+                        </p>
+                    </div>
                 </form>
             </div>
         </div>

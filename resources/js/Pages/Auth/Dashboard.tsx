@@ -6,6 +6,7 @@ interface User {
     id: number;
     name: string;
     email: string;
+    role?: string;
 }
 
 interface Props {
@@ -17,8 +18,10 @@ const Dashboard = ({ user }: Props) => {
         router.post("/logout");
     };
 
+    const isAdmin = user.role === "admin";
+
     return (
-        <div className="py-12 bg-cream min-h-screen">
+        <div className="font-sans py-12 bg-cream min-h-screen w-screen">
             <Head title="Dashboard" />
 
             <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -26,7 +29,7 @@ const Dashboard = ({ user }: Props) => {
                     <div className="p-6 bg-white border-b border-gray-200">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-semibold text-green">
-                                Dashboard
+                                {isAdmin ? "Admin Dashboard" : "Dashboard"}
                             </h2>
                             <button
                                 onClick={handleLogout}
@@ -40,6 +43,11 @@ const Dashboard = ({ user }: Props) => {
                             <p className="text-gray-600">
                                 Welcome back,{" "}
                                 <span className="font-bold">{user.name}</span>!
+                                {isAdmin && (
+                                    <span className="ml-2 bg-green text-white px-2 py-1 text-xs rounded-full">
+                                        Admin
+                                    </span>
+                                )}
                             </p>
                         </div>
 
@@ -56,6 +64,14 @@ const Dashboard = ({ user }: Props) => {
                                     <span className="font-medium">Email:</span>{" "}
                                     {user.email}
                                 </p>
+                                {isAdmin && (
+                                    <p>
+                                        <span className="font-medium">
+                                            Role:
+                                        </span>{" "}
+                                        Administrator
+                                    </p>
+                                )}
                             </div>
 
                             <div className="bg-pink bg-opacity-10 p-4 rounded-lg">
@@ -79,6 +95,31 @@ const Dashboard = ({ user }: Props) => {
                                             View Cart
                                         </Link>
                                     </li>
+                                    {isAdmin && (
+                                        <>
+                                            <li className="pt-4 border-t border-gray-200">
+                                                <h4 className="font-medium text-gray-700 mb-2">
+                                                    Admin Actions
+                                                </h4>
+                                            </li>
+                                            <li>
+                                                <Link
+                                                    href="/admin/products/create"
+                                                    className="text-green hover:underline font-medium"
+                                                >
+                                                    Create New Product
+                                                </Link>
+                                            </li>
+                                            <li>
+                                                <Link
+                                                    href="/admin/products"
+                                                    className="text-green hover:underline font-medium"
+                                                >
+                                                    Manage Products
+                                                </Link>
+                                            </li>
+                                        </>
+                                    )}
                                 </ul>
                             </div>
                         </div>

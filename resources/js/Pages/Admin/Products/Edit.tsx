@@ -1,7 +1,12 @@
-import { Head, useForm } from "@inertiajs/react";
+import { Head, useForm, Link } from "@inertiajs/react";
 import React, { useState, useEffect } from "react";
 import ShopLayout from "@/Layouts/ShopLayout";
 type FormDataConvertible = string | number | boolean | Blob | null;
+
+interface ProductImage {
+    imageSrc: string;
+    imageAlt: string;
+}
 
 interface ProductForm {
     name: string;
@@ -20,6 +25,18 @@ interface ImageError {
     error: string;
 }
 
+interface Product {
+    id: number;
+    name: string;
+    price: number;
+    description: string;
+    category: string;
+    age_group: string;
+    size: string;
+    images: ProductImage[];
+    in_stock: boolean;
+}
+
 const categories = [
     { value: "scarves", label: "Scarves" },
     { value: "sweaters", label: "Sweaters" },
@@ -36,21 +53,30 @@ const ageGroups = [
 const adultSizes = ["XS", "S", "M", "L", "XL", "XXL"];
 const babySizes = ["0-3M", "3-6M", "6-12M", "12-18M", "18-24M"];
 
-function Create() {
+interface Props {
+    product: Product;
+}
+
+function Edit({ product }: Props) {
     const { data, setData, post, processing, errors } = useForm<ProductForm>({
-        name: "",
-        price: 0,
-        description: "",
-        category: categories[0].value,
-        age_group: ageGroups[0].value,
-        size: "",
+        name: product.name,
+        price: product.price,
+        description: product.description,
+        category: product.category,
+        age_group: product.age_group,
+        size: product.size,
         images: [],
-        inStock: true,
+        inStock: product.in_stock,
     });
 
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-    const [availableSizes, setAvailableSizes] = useState<string[]>(adultSizes);
+    const [availableSizes, setAvailableSizes] = useState<string[]>(
+        product.age_group === "adult" ? adultSizes : babySizes
+    );
     const [imageErrors, setImageErrors] = useState<ImageError[]>([]);
+    const [existingImages, setExistingImages] = useState<ProductImage[]>(
+        product.images
+    );
 
     // Update available sizes when age group changes
     useEffect(() => {
@@ -68,6 +94,12 @@ function Create() {
             }
         }
     }, [data.age_group]);
+
+    // Add _existing_images to the form data
+    useEffect(() => {
+        // We need to track existing images in the form
+        setData("_existing_images", JSON.stringify(existingImages));
+    }, [existingImages]);
 
     const validateImage = (file: File): string | null => {
         // Check file size (max 2MB)
@@ -90,10 +122,13 @@ function Create() {
 
         const files = Array.from(fileList);
 
-        // Validate max 5 images
-        if (files.length > 5) {
+        // Check total images (existing + new)
+        if (existingImages.length + files.length > 5) {
             setImageErrors([
-                { file: files[0], error: "Maximum 5 images allowed" },
+                {
+                    file: files[0],
+                    error: `You can have a maximum of 5 images total. You already have ${existingImages.length} images.`,
+                },
             ]);
             return;
         }
@@ -128,23 +163,36 @@ function Create() {
         setData("size", size);
     };
 
+    const removeExistingImage = (index: number) => {
+        const updatedImages = [...existingImages];
+        updatedImages.splice(index, 1);
+        setExistingImages(updatedImages);
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post("/admin/products", {
+
+        // Send PUT request with method spoofing
+        post(`/admin/products/${product.id}?_method=PUT`, {
             forceFormData: true,
         });
     };
 
     return (
         <>
-            <Head title="Add Product" />
+            <Head title="Edit Product" />
             <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg font-sans">
-                <h1 className="text-3xl font-bold mb-2 text-green">
-                    Add New Product
-                </h1>
-                <p className="text-gray-600 mb-6">
-                    Create a new product for your store
-                </p>
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-3xl font-bold text-green">
+                        Edit Product
+                    </h1>
+                    <Link
+                        href="/admin/products"
+                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                    >
+                        Back to Products
+                    </Link>
+                </div>
 
                 {data.age_group && (
                     <div className="mb-4">
@@ -315,10 +363,57 @@ function Create() {
                         )}
                     </div>
 
-                    {/* Images */}
+                    {/* Existing Images */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Current Images
+                        </label>
+
+                        {existingImages.length > 0 ? (
+                            <div className="grid grid-cols-3 gap-4">
+                                {existingImages.map((image, index) => (
+                                    <div key={index} className="relative group">
+                                        <img
+                                            src={image.imageSrc}
+                                            alt={image.imageAlt}
+                                            className="w-full h-32 object-cover rounded-md border border-gray-200"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                removeExistingImage(index)
+                                            }
+                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className="h-4 w-4"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M6 18L18 6M6 6l12 12"
+                                                />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-gray-500 italic">
+                                No current images
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Upload New Images */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">
-                            Product Images (1-5 images, max 2MB each,
+                            Upload New Images (1-5 images, max 2MB each,
                             JPEG/PNG/JPG)
                         </label>
                         <input
@@ -356,7 +451,9 @@ function Create() {
 
                         {/* Image count indicator */}
                         <p className="mt-1 text-sm text-gray-500">
-                            {previewUrls.length} of 5 images selected
+                            Total images:{" "}
+                            {existingImages.length + previewUrls.length} of 5
+                            maximum
                         </p>
 
                         {/* Image previews */}
@@ -448,41 +545,49 @@ function Create() {
                             </div>
                         )}
 
-                        <button
-                            type="submit"
-                            disabled={
-                                processing || Object.keys(errors).length > 0
-                            }
-                            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-pink hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {processing ? (
-                                <>
-                                    <svg
-                                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <circle
-                                            className="opacity-25"
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            strokeWidth="4"
-                                        ></circle>
-                                        <path
-                                            className="opacity-75"
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                        ></path>
-                                    </svg>
-                                    Adding Product...
-                                </>
-                            ) : (
-                                "Add Product"
-                            )}
-                        </button>
+                        <div className="flex justify-end space-x-3">
+                            <Link
+                                href="/admin/products"
+                                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                            >
+                                Cancel
+                            </Link>
+                            <button
+                                type="submit"
+                                disabled={
+                                    processing || Object.keys(errors).length > 0
+                                }
+                                className="px-4 py-2 bg-pink text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {processing ? (
+                                    <>
+                                        <svg
+                                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            ></circle>
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            ></path>
+                                        </svg>
+                                        Updating Product...
+                                    </>
+                                ) : (
+                                    "Update Product"
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -490,6 +595,6 @@ function Create() {
     );
 }
 
-Create.layout = (page: React.ReactNode) => <ShopLayout children={page} />;
+Edit.layout = (page: React.ReactNode) => <ShopLayout children={page} />;
 
-export default Create;
+export default Edit;

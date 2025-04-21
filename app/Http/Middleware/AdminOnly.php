@@ -14,7 +14,7 @@ class AdminOnly
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!Auth::check() || Auth::user()->email !== 'admin@example.com') {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
             return Inertia::render('Error/Unauthorized', [
                 'status' => 403,
                 'message' => 'You do not have permission to access this area.'
