@@ -3,7 +3,6 @@
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ShopController;
-use App\Http\Controllers\ShopPageController;
 use App\Http\Middleware\AdminOnly;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -43,10 +42,15 @@ Route::get('/size-guide', [HomeController::class, 'sizeGuide']);
 require __DIR__ . '/auth.php';
 
 // Shop routes - order matters!
-Route::get('/shop', [ShopPageController::class, 'index']);
-Route::get('/shop/search', [ShopPageController::class, 'search']);
+Route::get('/shop', [ShopController::class, 'index']);
 Route::get('/shop/item/{id}', [ShopController::class, 'show'])->name('shop.item');
-Route::get('/shop/{age_group}', [ShopPageController::class, 'byAgeGroup'])->where('age_group', 'adult|baby');
+
+// Dedicated routes for adult and baby products that can handle search parameters
+Route::get('/shop/adults', [ShopController::class, 'adults'])->name('shop.adults');
+Route::get('/shop/babies', [ShopController::class, 'babies'])->name('shop.babies');
+
+// Keep the existing route for backwards compatibility
+Route::get('/shop/{age_group}', [ShopController::class, 'byAgeGroup'])->where('age_group', 'adult|baby');
 
 // Cart routes
 Route::middleware(['web'])->group(function () {

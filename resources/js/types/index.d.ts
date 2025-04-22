@@ -80,15 +80,17 @@ export type PaginatedData<T> = {
 export interface Product {
     id: number;
     name: string;
-    price: number;
     description: string;
-    category: string;
+    price: number;
+    category: "scarves" | "sweaters" | "hats" | "gloves" | "miscellaneous";
+    age_group: "adult" | "baby";
+    sizes: string[];
     images: {
         imageSrc: string;
         imageAlt: string;
     }[];
-    sizes: string[];
-    inStock: boolean;
+    in_stock: boolean;
+    stock_quantity: number;
 }
 
 export type PageProps<

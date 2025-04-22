@@ -153,14 +153,14 @@ const Header = () => {
                                             aria-labelledby="options-menu"
                                         >
                                             <Link
-                                                href="/shop/adult"
+                                                href="/shop/adults"
                                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                                 role="menuitem"
                                             >
                                                 Adults
                                             </Link>
                                             <Link
-                                                href="/shop/baby"
+                                                href="/shop/babies"
                                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                                 role="menuitem"
                                             >

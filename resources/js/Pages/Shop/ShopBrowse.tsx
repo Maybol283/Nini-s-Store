@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useState, useEffect } from "react";
 import {
     Dialog,
     DialogBackdrop,
@@ -16,15 +16,26 @@ import {
     MagnifyingGlassIcon,
     ShoppingBagIcon,
     XMarkIcon,
+    AdjustmentsHorizontalIcon,
 } from "@heroicons/react/24/outline";
 import { ChevronDownIcon, PlusIcon } from "@heroicons/react/20/solid";
 import ShopLayout from "@/Layouts/ShopLayout";
 import { useTrail, useTransition, a } from "@react-spring/web";
-import { Link } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import { Product } from "@/types";
 
 interface Props {
-    ageGroup: "adult" | "baby";
+    ageGroup: string;
+    products: Product[];
+    categories: string[];
+    filters?: {
+        q: string;
+        category: string;
+        age_group: string;
+        sort: string;
+        direction: string;
+        show_out_of_stock: boolean;
+    };
 }
 
 const categories = [
@@ -35,7 +46,11 @@ const categories = [
     { value: "miscellaneous", label: "Miscellaneous" },
 ];
 
-const sizes = {
+const sizes: {
+    adult: { value: string; label: string }[];
+    baby: { value: string; label: string }[];
+    [key: string]: { value: string; label: string }[];
+} = {
     adult: [
         { value: "S", label: "S" },
         { value: "M", label: "M" },
@@ -52,7 +67,7 @@ const sizes = {
     ],
 };
 
-const filters = [
+const filterOptions = [
     {
         id: "category",
         name: "Category",
@@ -65,65 +80,75 @@ const filters = [
     },
 ];
 
-const products: Product[] = [
-    {
-        id: 1,
-        name: "Winter Scarf",
-        description: "Warm and comfortable winter scarf.",
-        price: "$45",
-        category: "scarves",
-        age_group: "adult",
-        sizes: ["S", "M", "L", "XL"],
-        images: [
-            {
-                imageSrc:
-                    "https://plus.unsplash.com/premium_photo-1668430856694-62c7753fb03b?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                imageAlt: "Product image",
-            },
-        ],
-        in_stock: true,
-        stock_quantity: 10,
-    },
-    {
-        id: 2,
-        name: "Baby Hat",
-        description: "Soft and cozy baby hat.",
-        price: "$25",
-        category: "hats",
-        age_group: "baby",
-        sizes: ["0-3", "3-6", "6-9"],
-        images: [
-            {
-                imageSrc:
-                    "https://tailwindcss.com/plus-assets/img/ecommerce-images/category-page-02-image-card-02.jpg",
-                imageAlt: "Baby hat image",
-            },
-        ],
-        in_stock: true,
-        stock_quantity: 15,
-    },
-];
-
-export default function ShopBrowse({ ageGroup }: Props) {
+export default function ShopBrowse({
+    ageGroup,
+    products,
+    categories,
+    filters,
+}: Props) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState({
-        category: [] as string[],
+        category:
+            filters?.category !== "all" && filters?.category
+                ? [filters.category]
+                : [],
         size: [] as string[],
     });
 
     // Set the appropriate size options based on age group
-    filters[1].options = sizes[ageGroup];
+    useEffect(() => {
+        if (typeof ageGroup === "string" && ageGroup in sizes) {
+            filterOptions[1].options = sizes[ageGroup];
+        } else {
+            filterOptions[1].options = [];
+        }
+    }, [ageGroup]);
 
-    const [filteredProducts, setFilteredProducts] = useState(products);
+    // Keep track of products from the server
+    const [searchTerm, setSearchTerm] = useState(filters?.q || "");
+    const [selectedCategory, setSelectedCategory] = useState(
+        filters?.category || "all"
+    );
+    const [sortOption, setSortOption] = useState(filters?.sort || "created_at");
+    const [sortDirection, setSortDirection] = useState(
+        filters?.direction || "desc"
+    );
+    const [showOutOfStock, setShowOutOfStock] = useState(
+        filters?.show_out_of_stock || false
+    );
+    const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
 
-    const transitions = useTransition(filteredProducts, {
+    // Transitions for animation
+    const transitions = useTransition(products, {
         keys: (product) => product.id,
         from: { opacity: 0, transform: "translate3d(0,-40px,0)" },
         enter: { opacity: 1, transform: "translate3d(0,0px,0)" },
         trail: 200,
     });
 
+    const sortOptions = [
+        {
+            value: "created_at:desc",
+            label: "Newest",
+            option: "created_at",
+            direction: "desc",
+        },
+        {
+            value: "price:asc",
+            label: "Price: Low to High",
+            option: "price",
+            direction: "asc",
+        },
+        {
+            value: "price:desc",
+            label: "Price: High to Low",
+            option: "price",
+            direction: "desc",
+        },
+    ];
+
+    // When checkbox filters change, update the filter state
     const updateFilters = (
         checked: boolean,
         value: string,
@@ -140,33 +165,168 @@ export default function ShopBrowse({ ageGroup }: Props) {
         }
 
         setSelectedFilters(newFilters);
-        applyFilters(newFilters);
+
+        // If it's a category filter, also update the selectedCategory
+        if (filterType === "category") {
+            if (checked && newFilters.category.length === 1) {
+                setSelectedCategory(value);
+            } else if (!checked && selectedCategory === value) {
+                setSelectedCategory("all");
+            }
+        }
+
+        // Auto-apply filters after a short delay to avoid too many requests
+        const timeoutId = setTimeout(() => {
+            applyFiltersFromRouter(newFilters);
+        }, 100);
+
+        return () => clearTimeout(timeoutId);
     };
 
-    const applyFilters = (filters: { category: string[]; size: string[] }) => {
-        const noFiltersSelected = Object.values(filters).every(
-            (filterArray) => filterArray.length === 0
-        );
+    // Apply filters and sorting via backend with optional filter override
+    const applyFiltersFromRouter = (filterOverride?: {
+        category: string[];
+        size: string[];
+    }) => {
+        const filtersToUse = filterOverride || selectedFilters;
 
-        if (noFiltersSelected) {
-            setFilteredProducts(
-                products.filter((p) => p.age_group === ageGroup)
-            );
+        // Update the local state immediately to ensure UI consistency
+        if (filterOverride) {
+            setSelectedFilters(filterOverride);
+        }
+
+        // Always make sure size options are populated based on the original age group
+        if (typeof ageGroup === "string" && ageGroup in sizes) {
+            filterOptions[1].options = sizes[ageGroup];
+        }
+
+        // Check if all filters are cleared and we should go back to the base URL
+        const allFiltersCleared =
+            filtersToUse.category.length === 0 &&
+            filtersToUse.size.length === 0 &&
+            !searchTerm &&
+            sortOption === "created_at" &&
+            sortDirection === "desc" &&
+            !showOutOfStock;
+
+        // If all filters cleared, just go to the base age group page
+        if (allFiltersCleared && typeof ageGroup === "string") {
+            router.visit(`/shop/${ageGroup}`, {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            });
             return;
         }
 
-        const filtered = products.filter((product) => {
-            const categoryMatch =
-                filters.category.length === 0 ||
-                filters.category.includes(product.category);
-            const sizeMatch =
-                filters.size.length === 0 ||
-                filters.size.some((size) => product.sizes.includes(size));
-            const ageMatch = product.age_group === ageGroup;
-            return categoryMatch && sizeMatch && ageMatch;
-        });
+        // For category, use the selected category from dropdown or the first selected filter if any
+        const categoryParam =
+            selectedCategory !== "all"
+                ? selectedCategory
+                : filtersToUse.category.length > 0
+                ? filtersToUse.category[0]
+                : "all";
 
-        setFilteredProducts(filtered);
+        // Always include parameters (even empty ones) to ensure consistent behavior
+        const params = new URLSearchParams();
+
+        // Search term (optional)
+        if (searchTerm) {
+            params.append("q", searchTerm);
+        }
+
+        // Always append category parameter
+        params.append("category", categoryParam);
+
+        // Always append size parameter (even if empty)
+        params.append("size", filtersToUse.size.join(","));
+
+        // Sort parameters (if non-default)
+        if (sortOption !== "created_at" || sortDirection !== "desc") {
+            params.append("sort", sortOption);
+            params.append("direction", sortDirection);
+        }
+
+        // Stock parameter (if showing out of stock)
+        if (showOutOfStock) {
+            params.append("show_out_of_stock", "true");
+        }
+
+        // Use the correct route based on the age group
+        const baseRoute =
+            typeof ageGroup === "string" ? `/shop/${ageGroup}s` : "/shop";
+
+        router.visit(
+            `${baseRoute}${params.toString() ? `?${params.toString()}` : ""}`,
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            }
+        );
+    };
+
+    // Handle sort selection from dropdown
+    const handleSortSelection = (sortValue: string) => {
+        const [option, direction] = sortValue.split(":");
+        setSortOption(option);
+        setSortDirection(direction as "asc" | "desc");
+        setSortDropdownOpen(false);
+
+        // Check if this would clear all filters and we should go back to the base URL
+        const allFiltersCleared =
+            selectedFilters.category.length === 0 &&
+            selectedFilters.size.length === 0 &&
+            !searchTerm &&
+            option === "created_at" &&
+            direction === "desc" &&
+            !showOutOfStock;
+
+        // If all filters cleared and we have an age group, go to the age group browse page
+        if (allFiltersCleared && typeof ageGroup === "string") {
+            router.visit(`/shop/${ageGroup}`, {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            });
+            return;
+        }
+
+        // Always include all parameters for consistency
+        const params = new URLSearchParams();
+
+        // Search term (optional)
+        if (searchTerm) {
+            params.append("q", searchTerm);
+        }
+
+        // Always include category
+        params.append("category", selectedCategory);
+
+        // Size parameter (even if empty)
+        params.append("size", selectedFilters.size.join(","));
+
+        // Always include sort parameters
+        params.append("sort", option);
+        params.append("direction", direction);
+
+        // Stock parameter (if showing out of stock)
+        if (showOutOfStock) {
+            params.append("show_out_of_stock", "true");
+        }
+
+        // Use the correct route based on the age group
+        const baseRoute =
+            typeof ageGroup === "string" ? `/shop/${ageGroup}s` : "/shop";
+
+        router.visit(
+            `${baseRoute}${params.toString() ? `?${params.toString()}` : ""}`,
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            }
+        );
     };
 
     return (
@@ -251,7 +411,7 @@ export default function ShopBrowse({ ageGroup }: Props) {
 
                                 {/* Filters */}
                                 <form className="mt-4">
-                                    {filters.map((section) => (
+                                    {filterOptions.map((section) => (
                                         <Disclosure
                                             key={section.name}
                                             as="div"
@@ -287,12 +447,25 @@ export default function ShopBrowse({ ageGroup }: Props) {
                                                                     <div className="flex h-5 shrink-0 items-center">
                                                                         <div className="group grid size-4 grid-cols-1">
                                                                             <input
-                                                                                defaultValue={
+                                                                                value={
                                                                                     option.value
                                                                                 }
                                                                                 id={`${section.id}-${optionIdx}-mobile`}
                                                                                 name={`${section.id}[]`}
                                                                                 type="checkbox"
+                                                                                checked={
+                                                                                    section.id ===
+                                                                                    "category"
+                                                                                        ? selectedFilters.category.includes(
+                                                                                              option.value
+                                                                                          )
+                                                                                        : section.id ===
+                                                                                          "size"
+                                                                                        ? selectedFilters.size.includes(
+                                                                                              option.value
+                                                                                          )
+                                                                                        : false
+                                                                                }
                                                                                 className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                                                                                 onChange={(
                                                                                     e
@@ -330,17 +503,68 @@ export default function ShopBrowse({ ageGroup }: Props) {
                     </Dialog>
 
                     <main className="mx-auto max-w-2xl px-4 lg:max-w-7xl lg:px-8">
-                        <div className="text-center border-b border-gray-200 pb-10 pt-24">
-                            <form>
-                                <input
-                                    type="text"
-                                    placeholder="What are you looking for..."
-                                    className="border border-gray-300 rounded-md p-2 w-2/3"
-                                    onChange={(e) =>
-                                        console.log(e.target.value)
+                        <div className="flex justify-between items-center border-b border-gray-200 pb-6 pt-24">
+                            <h1 className="text-xl font-semibold text-gray-900">
+                                {filters?.age_group &&
+                                filters.age_group !== "all"
+                                    ? filters.age_group
+                                          .charAt(0)
+                                          .toUpperCase() +
+                                      filters.age_group.slice(1)
+                                    : typeof ageGroup === "string"
+                                    ? ageGroup.charAt(0).toUpperCase() +
+                                      ageGroup.slice(1)
+                                    : ""}{" "}
+                                Products
+                            </h1>
+
+                            {/* Sort dropdown */}
+                            <div className="relative">
+                                <button
+                                    onClick={() =>
+                                        setSortDropdownOpen(!sortDropdownOpen)
                                     }
-                                />
-                            </form>
+                                    className="flex items-center text-gray-600 hover:text-gray-900"
+                                >
+                                    <AdjustmentsHorizontalIcon className="h-5 w-5 mr-1" />
+                                    <span className="hidden sm:inline-block">
+                                        Sort
+                                    </span>
+                                    <ChevronDownIcon className="h-4 w-4 ml-1" />
+                                </button>
+
+                                {sortDropdownOpen && (
+                                    <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                                        <div
+                                            className="py-1"
+                                            role="menu"
+                                            aria-orientation="vertical"
+                                        >
+                                            {sortOptions.map((option) => (
+                                                <button
+                                                    key={option.value}
+                                                    onClick={() =>
+                                                        handleSortSelection(
+                                                            option.value
+                                                        )
+                                                    }
+                                                    className={`${
+                                                        sortOption ===
+                                                            option.option &&
+                                                        sortDirection ===
+                                                            option.direction
+                                                            ? "bg-gray-100 text-gray-900"
+                                                            : "text-gray-700"
+                                                    } block px-4 py-2 text-sm w-full text-left hover:bg-gray-50`}
+                                                    role="menuitem"
+                                                >
+                                                    {option.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className="pb-24 pt-12 lg:grid lg:grid-cols-4 lg:gap-x-8">
@@ -363,102 +587,120 @@ export default function ShopBrowse({ ageGroup }: Props) {
                                 </button>
 
                                 <div className="hidden lg:block">
-                                    <form className="space-y-10 divide-y divide-gray-200">
-                                        {filters.map((section, sectionIdx) => (
-                                            <div
-                                                key={section.name}
-                                                className={
-                                                    sectionIdx === 0
-                                                        ? undefined
-                                                        : "pt-10"
-                                                }
-                                            >
-                                                <fieldset>
-                                                    <legend className="block text-sm font-medium text-gray-900">
-                                                        {section.name}
-                                                    </legend>
-                                                    <div className="space-y-3 pt-6">
-                                                        {section.options.map(
-                                                            (
-                                                                option,
-                                                                optionIdx
-                                                            ) => (
-                                                                <div
-                                                                    key={
-                                                                        option.value
-                                                                    }
-                                                                    className="flex gap-3"
-                                                                >
-                                                                    <div className="flex h-5 shrink-0 items-center">
-                                                                        <div className="group grid size-4 grid-cols-1">
-                                                                            <input
-                                                                                defaultValue={
-                                                                                    option.value
-                                                                                }
-                                                                                id={`${section.id}-${optionIdx}`}
-                                                                                name={`${section.id}[]`}
-                                                                                type="checkbox"
-                                                                                className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
-                                                                                onChange={(
-                                                                                    e
-                                                                                ) =>
-                                                                                    updateFilters(
-                                                                                        e
-                                                                                            .target
-                                                                                            .checked,
-                                                                                        option.value,
-                                                                                        section.id as keyof typeof selectedFilters
-                                                                                    )
-                                                                                }
-                                                                            />
-                                                                            <svg
-                                                                                fill="none"
-                                                                                viewBox="0 0 14 14"
-                                                                                className="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25"
+                                    <div className="border-b border-gray-200">
+                                        {/* Filter sections */}
+                                        <div className="pt-6">
+                                            {filterOptions.map(
+                                                (section, sectionIdx) => (
+                                                    <div
+                                                        key={section.name}
+                                                        className={
+                                                            sectionIdx === 0
+                                                                ? undefined
+                                                                : "pt-10"
+                                                        }
+                                                    >
+                                                        <fieldset>
+                                                            <legend className="block text-sm font-medium text-gray-900">
+                                                                {section.name}
+                                                            </legend>
+                                                            <div className="space-y-3 pt-6">
+                                                                {section.options.map(
+                                                                    (
+                                                                        option,
+                                                                        optionIdx
+                                                                    ) => (
+                                                                        <div
+                                                                            key={
+                                                                                option.value
+                                                                            }
+                                                                            className="flex gap-3"
+                                                                        >
+                                                                            <div className="flex h-5 shrink-0 items-center">
+                                                                                <div className="group grid size-4 grid-cols-1">
+                                                                                    <input
+                                                                                        value={
+                                                                                            option.value
+                                                                                        }
+                                                                                        id={`${section.id}-${optionIdx}`}
+                                                                                        name={`${section.id}[]`}
+                                                                                        type="checkbox"
+                                                                                        checked={
+                                                                                            section.id ===
+                                                                                            "category"
+                                                                                                ? selectedFilters.category.includes(
+                                                                                                      option.value
+                                                                                                  )
+                                                                                                : section.id ===
+                                                                                                  "size"
+                                                                                                ? selectedFilters.size.includes(
+                                                                                                      option.value
+                                                                                                  )
+                                                                                                : false
+                                                                                        }
+                                                                                        className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                                                                                        onChange={(
+                                                                                            e
+                                                                                        ) =>
+                                                                                            updateFilters(
+                                                                                                e
+                                                                                                    .target
+                                                                                                    .checked,
+                                                                                                option.value,
+                                                                                                section.id as keyof typeof selectedFilters
+                                                                                            )
+                                                                                        }
+                                                                                    />
+                                                                                    <svg
+                                                                                        fill="none"
+                                                                                        viewBox="0 0 14 14"
+                                                                                        className="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25"
+                                                                                    >
+                                                                                        <path
+                                                                                            d="M3 8L6 11L11 3.5"
+                                                                                            strokeWidth={
+                                                                                                2
+                                                                                            }
+                                                                                            strokeLinecap="round"
+                                                                                            strokeLinejoin="round"
+                                                                                            className="opacity-0 group-has-[:checked]:opacity-100"
+                                                                                        />
+                                                                                        <path
+                                                                                            d="M3 7H11"
+                                                                                            strokeWidth={
+                                                                                                2
+                                                                                            }
+                                                                                            strokeLinecap="round"
+                                                                                            strokeLinejoin="round"
+                                                                                            className="opacity-0 group-has-[:indeterminate]:opacity-100"
+                                                                                        />
+                                                                                    </svg>
+                                                                                </div>
+                                                                            </div>
+                                                                            <label
+                                                                                htmlFor={`${section.id}-${optionIdx}`}
+                                                                                className="text-sm text-gray-500"
                                                                             >
-                                                                                <path
-                                                                                    d="M3 8L6 11L11 3.5"
-                                                                                    strokeWidth={
-                                                                                        2
-                                                                                    }
-                                                                                    strokeLinecap="round"
-                                                                                    strokeLinejoin="round"
-                                                                                    className="opacity-0 group-has-[:checked]:opacity-100"
-                                                                                />
-                                                                                <path
-                                                                                    d="M3 7H11"
-                                                                                    strokeWidth={
-                                                                                        2
-                                                                                    }
-                                                                                    strokeLinecap="round"
-                                                                                    strokeLinejoin="round"
-                                                                                    className="opacity-0 group-has-[:indeterminate]:opacity-100"
-                                                                                />
-                                                                            </svg>
+                                                                                {
+                                                                                    option.label
+                                                                                }
+                                                                            </label>
                                                                         </div>
-                                                                    </div>
-                                                                    <label
-                                                                        htmlFor={`${section.id}-${optionIdx}`}
-                                                                        className="text-sm text-gray-500"
-                                                                    >
-                                                                        {
-                                                                            option.label
-                                                                        }
-                                                                    </label>
-                                                                </div>
-                                                            )
-                                                        )}
+                                                                    )
+                                                                )}
+                                                            </div>
+                                                        </fieldset>
                                                     </div>
-                                                </fieldset>
-                                            </div>
-                                        ))}
-                                    </form>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Products section - takes 4 columns */}
+                            {/* Products section - takes 3 columns */}
                             <div className="lg:col-span-3">
-                                {filteredProducts.length === 0 ? (
+                                {products.length === 0 ? (
                                     <div className="flex items-center justify-center h-full py-56">
                                         <p className="text-lg text-gray-500">
                                             No products available that fit your
@@ -466,47 +708,55 @@ export default function ShopBrowse({ ageGroup }: Props) {
                                         </p>
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:gap-x-8 xl:grid-cols-3">
+                                    <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
                                         {transitions((style, product) => (
-                                            <Link
-                                                href={`/shop/item/${product.id}`}
+                                            <a.div
+                                                style={style}
+                                                key={product.id}
+                                                className="group relative"
                                             >
-                                                <a.div
-                                                    style={style}
-                                                    className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white"
+                                                <Link
+                                                    href={`/shop/item/${product.id}`}
                                                 >
-                                                    <div className="aspect-h-4 aspect-w-3 bg-gray-200 sm:aspect-none group-hover:opacity-75 sm:h-96">
+                                                    <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200">
                                                         <img
                                                             src={
                                                                 product
                                                                     .images[0]
-                                                                    .imageSrc
+                                                                    ?.imageSrc ||
+                                                                "/images/placeholder.png"
                                                             }
                                                             alt={
                                                                 product
                                                                     .images[0]
-                                                                    .imageAlt
+                                                                    ?.imageAlt ||
+                                                                product.name
                                                             }
                                                             className="h-full w-full object-cover object-center"
                                                         />
                                                     </div>
-                                                    <div className="flex flex-1 flex-col space-y-2 p-4">
-                                                        <h3 className="text-sm font-medium text-gray-900">
-                                                            {product.name}
-                                                        </h3>
-                                                        <p className="text-sm text-gray-500 line-clamp-2 h-12 overflow-hidden">
-                                                            {
-                                                                product.description
-                                                            }
-                                                        </p>
-                                                        <div className="flex flex-1 flex-col justify-end">
-                                                            <p className="text-base font-medium text-gray-900">
-                                                                {product.price}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </a.div>
-                                            </Link>
+                                                    <h3 className="mt-4 text-sm text-gray-700">
+                                                        {product.name}
+                                                    </h3>
+                                                    <p className="mt-1 text-lg font-medium text-gray-900">
+                                                        £
+                                                        {
+                                                            // If price is a number or can be converted to one, format it
+                                                            typeof product.price ===
+                                                                "number" ||
+                                                            !isNaN(
+                                                                Number(
+                                                                    product.price
+                                                                )
+                                                            )
+                                                                ? Number(
+                                                                      product.price
+                                                                  ).toFixed(2)
+                                                                : "0.00" // fallback
+                                                        }
+                                                    </p>
+                                                </Link>
+                                            </a.div>
                                         ))}
                                     </div>
                                 )}
