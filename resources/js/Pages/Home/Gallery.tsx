@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useInView, useTrail, animated } from "@react-spring/web";
+import { useInView } from "@react-spring/web";
 import { Link } from "@inertiajs/react";
 
 function padToFour(num: number) {
@@ -12,7 +12,7 @@ const pictures = {
         const i = index + 3;
         return {
             url: `storage/gallery_images/IMG-20250123-WA0${padToFour(i)}.webp`,
-            alt: `1${i}`,
+            alt: `Gallery image ${i}`,
         };
     }),
     gallery_mobile: Array.from({ length: 23 - 3 + 1 }, (_, index) => {
@@ -21,13 +21,14 @@ const pictures = {
             url: `./app/storage/public/mobile_gallery_images/IMG-20250123-WA0${padToFour(
                 i
             )}`,
-            alt: `1${i}`,
+            alt: `Gallery image ${i}`,
         };
     }),
 };
 
 export default function Gallery() {
     const [currentGallery, setCurrentGallery] = useState(pictures.gallery);
+    const [visible, setVisible] = useState(false);
 
     // Switch images based on screen width
     useEffect(() => {
@@ -45,55 +46,54 @@ export default function Gallery() {
     // We only want the first 8 images for this "featured" view
     const featuredImages = currentGallery.slice(0, 8);
 
-    // Intersection Observer: container in view triggers the trail animation
+    // Intersection Observer: container in view triggers the animation
     const [ref, inView] = useInView({
         rootMargin: "-100px",
         once: true,
     });
 
-    // useTrail to create stagger for the items on this page (the featured 8)
-    const trail = useTrail(featuredImages.length, {
-        from: { opacity: 0, transform: "translateY(20px)" },
-        to: {
-            opacity: inView ? 1 : 0,
-            transform: inView ? "translateY(0)" : "translateY(20px)",
-        },
-        delay: 200,
-        config: { mass: 1, tension: 280, friction: 30 },
-    });
+    // Handle visibility when in view
+    useEffect(() => {
+        if (inView) {
+            setVisible(true);
+        }
+    }, [inView]);
 
     return (
-        <div className="bg-cream h-screen flex flex-col xl:pt-8">
+        <div className="container mx-auto px-4 py-8 flex flex-col">
+            <h2 className="text-3xl font-semibold mb-6 text-center">Gallery</h2>
             <div
                 ref={ref}
-                className="grid grid-cols-2 md:grid-cols-4 gap-2 p-2 overflow-hidden h-[75vh]"
+                className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 flex-grow"
             >
-                {trail.map((style, index) => {
-                    const { url, alt } = featuredImages[index];
-                    return (
-                        <animated.div
-                            key={index}
-                            style={style}
-                            className="relative h-full"
-                        >
-                            <div className="absolute inset-0">
-                                <img
-                                    src={url}
-                                    alt={alt}
-                                    className="w-full h-full object-cover"
-                                    loading="lazy"
-                                />
-                            </div>
-                        </animated.div>
-                    );
-                })}
+                {featuredImages.map((image, index) => (
+                    <div
+                        key={index}
+                        className={`group relative bg-white rounded-lg shadow overflow-hidden transition-all duration-700 transform ${
+                            visible
+                                ? "opacity-100 translate-y-0"
+                                : "opacity-0 translate-y-5"
+                        }`}
+                        style={{
+                            transitionDelay: `${index * 100}ms`,
+                        }}
+                    >
+                        <div className="aspect-square w-full overflow-hidden">
+                            <img
+                                src={image.url}
+                                alt={image.alt}
+                                className="h-full w-full object-cover object-center transition-opacity group-hover:opacity-90"
+                                loading="lazy"
+                            />
+                        </div>
+                    </div>
+                ))}
             </div>
 
-            <div className="mt-2 py-2 text-center">
+            <div className="mt-6 md:mt-24 text-center">
                 <Link
                     href="/"
-                    type="submit"
-                    className="text-outline-green px-8 py-2 border border-green hover:bg-green hover:text-cream transition-colors duration-300"
+                    className="inline-block bg-cream text-green border border-green px-6 py-3 rounded-md hover:bg-green hover:text-cream transition-colors duration-300 font-medium"
                 >
                     View All Images
                 </Link>

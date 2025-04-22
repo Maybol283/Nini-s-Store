@@ -1,8 +1,33 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ShopLayout from "@/Layouts/ShopLayout";
 import { Link } from "@inertiajs/react";
+import ProductCard from "@/Components/Shop/ProductCard";
+import { Product } from "@/types";
 
-export default function ShopLandingPage() {
+interface Props {
+    featuredProducts: Product[];
+    categories: string[];
+    ageGroups: string[];
+}
+
+export default function ShopLandingPage({
+    featuredProducts = [],
+    categories = [],
+    ageGroups = [],
+}: Props) {
+    // Animation states
+    const [isVisible, setIsVisible] = useState(false);
+
+    // Trigger animations on component mount
+    useEffect(() => {
+        setIsVisible(true);
+    }, []);
+
+    // CSS for animated elements
+    const animationBaseClass = "transition-all duration-700 transform";
+    const beforeAnimation = `${animationBaseClass} opacity-0 translate-x-20`;
+    const afterAnimation = `${animationBaseClass} opacity-100 translate-x-0`;
+
     return (
         <ShopLayout>
             <div className="p-8 font-sans">
@@ -22,7 +47,7 @@ export default function ShopLandingPage() {
                         Handcrafted Collection
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Link href="/shop/adult">
+                        <Link href="/shop/adults">
                             <div className="p-4 bg-beige rounded-md text-center hover:bg-green hover:text-cream transition-colors duration-300">
                                 <h3 className="text-2xl font-bold">Adults</h3>
                                 <p className="mt-2 text-sm">
@@ -30,7 +55,7 @@ export default function ShopLandingPage() {
                                 </p>
                             </div>
                         </Link>
-                        <Link href="/shop/baby">
+                        <Link href="/shop/babies">
                             <div className="p-4 bg-beige rounded-md text-center hover:bg-green hover:text-cream transition-colors duration-300">
                                 <h3 className="text-2xl font-bold">Babies</h3>
                                 <p className="mt-2 text-sm">
@@ -47,54 +72,35 @@ export default function ShopLandingPage() {
                     <h2 className="text-3xl font-semibold mb-4">
                         New Arrivals
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        {/* Product Card for Sweater */}
-                        <div className="bg-white p-4 rounded shadow">
-                            <img
-                                src="https://via.placeholder.com/300x200"
-                                alt="Crocheted Sweater"
-                                className="w-full h-32 object-cover mb-4 rounded"
-                            />
-                            <h3 className="text-xl font-bold">
-                                Crocheted Sweater
-                            </h3>
-                            <p className="mt-2 text-green">$79.99</p>
+                    {featuredProducts.length === 0 ? (
+                        <p className="text-center text-gray-500">
+                            No featured products available.
+                        </p>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            {featuredProducts
+                                .slice(0, 4)
+                                .map((product, index) => (
+                                    <div
+                                        key={product.id}
+                                        className={`${
+                                            isVisible
+                                                ? afterAnimation
+                                                : beforeAnimation
+                                        } delay-${index * 150}`}
+                                        style={{
+                                            transitionDelay: `${index * 150}ms`,
+                                        }}
+                                    >
+                                        <ProductCard
+                                            product={product}
+                                            showDescription={false}
+                                            className="transform transition duration-300 hover:-translate-y-1 hover:shadow-lg bg-white rounded shadow"
+                                        />
+                                    </div>
+                                ))}
                         </div>
-                        {/* Product Card for Skirt */}
-                        <div className="bg-white p-4 rounded shadow">
-                            <img
-                                src="https://via.placeholder.com/300x200"
-                                alt="Crocheted Skirt"
-                                className="w-full h-32 object-cover mb-4 rounded"
-                            />
-                            <h3 className="text-xl font-bold">
-                                Crocheted Skirt
-                            </h3>
-                            <p className="mt-2 text-green">$69.99</p>
-                        </div>
-                        {/* Product Card for Gloves */}
-                        <div className="bg-white p-4 rounded shadow">
-                            <img
-                                src="https://via.placeholder.com/300x200"
-                                alt="Crocheted Gloves"
-                                className="w-full h-32 object-cover mb-4 rounded"
-                            />
-                            <h3 className="text-xl font-bold">
-                                Crocheted Gloves
-                            </h3>
-                            <p className="mt-2 text-green">$39.99</p>
-                        </div>
-                        {/* Product Card for Hat */}
-                        <div className="bg-white p-4 rounded shadow">
-                            <img
-                                src="https://via.placeholder.com/300x200"
-                                alt="Crocheted Hat"
-                                className="w-full h-32 object-cover mb-4 rounded"
-                            />
-                            <h3 className="text-xl font-bold">Crocheted Hat</h3>
-                            <p className="mt-2 text-green">$29.99</p>
-                        </div>
-                    </div>
+                    )}
                 </section>
 
                 {/* Why Choose Us */}
@@ -177,31 +183,68 @@ export default function ShopLandingPage() {
                     </div>
                 </section>
 
-                {/* Newsletter Signup */}
-                <section className="mb-12 bg-green text-cream rounded-lg p-8">
-                    <div className="max-w-2xl mx-auto text-center">
+                {/* Popular Categories */}
+                {categories.length > 0 && (
+                    <section className="mb-12">
                         <h2 className="text-3xl font-semibold mb-4">
-                            Stay Updated
+                            Popular Categories
                         </h2>
-                        <p className="mb-6">
-                            Subscribe to our newsletter for updates on new
-                            products and special offers!
-                        </p>
-                        <form className="flex flex-col md:flex-row gap-4 justify-center">
-                            <input
-                                type="email"
-                                placeholder="Enter your email"
-                                className="px-4 py-2 rounded-md text-gray-800 w-full md:w-auto"
-                            />
-                            <button
-                                type="submit"
-                                className="bg-cream text-green px-6 py-2 rounded-md hover:bg-opacity-90 transition-colors"
-                            >
-                                Subscribe
-                            </button>
-                        </form>
-                    </div>
-                </section>
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                            {categories.map((category, index) => (
+                                <Link
+                                    key={category}
+                                    href={`/shop/search?category=${category}`}
+                                    className={`bg-cream p-4 rounded-md text-center hover:bg-green hover:text-cream transition-colors duration-300 ${
+                                        isVisible
+                                            ? afterAnimation
+                                            : beforeAnimation
+                                    }`}
+                                    style={{
+                                        transitionDelay: `${index * 100}ms`,
+                                    }}
+                                >
+                                    <span className="text-lg font-medium capitalize">
+                                        {category}
+                                    </span>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {/* Trending Now */}
+                {featuredProducts.length > 4 && (
+                    <section className="mb-12">
+                        <h2 className="text-3xl font-semibold mb-4">
+                            Trending Now
+                        </h2>
+                        <div className="md:flex md:flex-grow md:flex-wrap grid-cols-1 gap-6">
+                            {featuredProducts
+                                .slice(4, 8)
+                                .map((product, index) => (
+                                    <div
+                                        key={product.id}
+                                        className={`${
+                                            isVisible
+                                                ? afterAnimation
+                                                : beforeAnimation
+                                        }`}
+                                        style={{
+                                            transitionDelay: `${
+                                                (index + 4) * 150
+                                            }ms`,
+                                        }}
+                                    >
+                                        <ProductCard
+                                            product={product}
+                                            showDescription={false}
+                                            className="transform transition duration-300 hover:-translate-y-1 hover:shadow-lg bg-white rounded shadow"
+                                        />
+                                    </div>
+                                ))}
+                        </div>
+                    </section>
+                )}
 
                 {/* Customer Reviews */}
                 <section className="mb-12">
@@ -228,7 +271,12 @@ export default function ShopLandingPage() {
                         ].map((review, index) => (
                             <div
                                 key={index}
-                                className="bg-white p-6 rounded-lg shadow-md"
+                                className={`bg-white p-6 rounded-lg shadow-md ${
+                                    isVisible ? afterAnimation : beforeAnimation
+                                }`}
+                                style={{
+                                    transitionDelay: `${index * 200}ms`,
+                                }}
                             >
                                 <div className="flex items-center mb-4">
                                     {[...Array(review.rating)].map((_, i) => (
@@ -248,6 +296,31 @@ export default function ShopLandingPage() {
                                 <p className="font-semibold">{review.name}</p>
                             </div>
                         ))}
+                    </div>
+                </section>
+
+                {/* Call to Action */}
+                <section className="mb-12 bg-green text-cream rounded-lg p-8 text-center">
+                    <h2 className="text-3xl font-semibold mb-4">
+                        Ready to Find Your Perfect Crochet?
+                    </h2>
+                    <p className="mb-6 max-w-2xl mx-auto">
+                        Browse our collection to find unique, handcrafted items
+                        that will become treasured pieces in your wardrobe.
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-4">
+                        <Link
+                            href="/shop/adults"
+                            className="bg-cream text-green px-6 py-3 rounded-md hover:bg-opacity-90 transition-colors font-medium"
+                        >
+                            Shop Adult Collection
+                        </Link>
+                        <Link
+                            href="/shop/babies"
+                            className="bg-cream text-green px-6 py-3 rounded-md hover:bg-opacity-90 transition-colors font-medium"
+                        >
+                            Shop Baby Collection
+                        </Link>
                     </div>
                 </section>
             </div>

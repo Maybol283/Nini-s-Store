@@ -23,6 +23,7 @@ class ShopController extends Controller
                     'id' => $product->id,
                     'name' => $product->name,
                     'price' => $product->price,
+                    'description' => $product->description,
                     'category' => $product->category,
                     'age_group' => $product->age_group,
                     'size' => $product->size,
@@ -61,6 +62,7 @@ class ShopController extends Controller
                     'id' => $product->id,
                     'name' => $product->name,
                     'price' => $product->price,
+                    'description' => $product->description,
                     'category' => $product->category,
                     'age_group' => $product->age_group,
                     'size' => $product->size,
@@ -92,6 +94,7 @@ class ShopController extends Controller
             return [
                 'id' => $product->id,
                 'name' => $product->name,
+                'description' => $product->description,
                 'price' => $product->price,
                 'category' => $product->category,
                 'age_group' => $product->age_group,

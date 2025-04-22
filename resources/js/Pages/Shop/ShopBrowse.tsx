@@ -23,6 +23,7 @@ import ShopLayout from "@/Layouts/ShopLayout";
 import { useTrail, useTransition, a } from "@react-spring/web";
 import { Link, router } from "@inertiajs/react";
 import { Product } from "@/types";
+import ProductCard from "@/Components/Shop/ProductCard";
 
 interface Props {
     ageGroup: string;
@@ -713,49 +714,11 @@ export default function ShopBrowse({
                                             <a.div
                                                 style={style}
                                                 key={product.id}
-                                                className="group relative"
                                             >
-                                                <Link
-                                                    href={`/shop/item/${product.id}`}
-                                                >
-                                                    <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200">
-                                                        <img
-                                                            src={
-                                                                product
-                                                                    .images[0]
-                                                                    ?.imageSrc ||
-                                                                "/images/placeholder.png"
-                                                            }
-                                                            alt={
-                                                                product
-                                                                    .images[0]
-                                                                    ?.imageAlt ||
-                                                                product.name
-                                                            }
-                                                            className="h-full w-full object-cover object-center"
-                                                        />
-                                                    </div>
-                                                    <h3 className="mt-4 text-sm text-gray-700">
-                                                        {product.name}
-                                                    </h3>
-                                                    <p className="mt-1 text-lg font-medium text-gray-900">
-                                                        £
-                                                        {
-                                                            // If price is a number or can be converted to one, format it
-                                                            typeof product.price ===
-                                                                "number" ||
-                                                            !isNaN(
-                                                                Number(
-                                                                    product.price
-                                                                )
-                                                            )
-                                                                ? Number(
-                                                                      product.price
-                                                                  ).toFixed(2)
-                                                                : "0.00" // fallback
-                                                        }
-                                                    </p>
-                                                </Link>
+                                                <ProductCard
+                                                    product={product}
+                                                    showDescription={true}
+                                                />
                                             </a.div>
                                         ))}
                                     </div>
