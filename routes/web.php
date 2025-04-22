@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\ShopPageController;
 use App\Http\Middleware\AdminOnly;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -32,43 +34,21 @@ Inertia::share('auth', function () {
     ];
 });
 
-Route::get('/', function () {
-    return Inertia::render('LandingPage', [
-        'message' => 'Welcome to the About Us page!',
-    ]);
-});
-
-Route::get('/about', function () {
-    return Inertia::render('Home/About');
-});
+// Home routes
+Route::get('/', [HomeController::class, 'landing']);
+Route::get('/about', [HomeController::class, 'about']);
+Route::get('/size-guide', [HomeController::class, 'sizeGuide']);
 
 // Include Auth routes
 require __DIR__ . '/auth.php';
 
-Route::get('/size-guide', function () {
-    return Inertia::render('SizeGuide');
-});
-
 // Shop routes - order matters!
-Route::get('/shop', function () {
-    return Inertia::render('Shop/ShopLandingPage');
-});
-
-Route::get('/shop/search', function () {
-    return Inertia::render('Shop/ShopBrowse');
-});
-
+Route::get('/shop', [ShopPageController::class, 'index']);
+Route::get('/shop/search', [ShopPageController::class, 'search']);
 Route::get('/shop/item/{id}', [ShopController::class, 'show'])->name('shop.item');
+Route::get('/shop/{age_group}', [ShopPageController::class, 'byAgeGroup'])->where('age_group', 'adult|baby');
 
-Route::get('/shop/{age_group}', function (string $age_group) {
-    if (!in_array($age_group, ['adult', 'baby'])) {
-        abort(404);
-    }
-    return Inertia::render('Shop/ShopBrowse', [
-        'ageGroup' => $age_group
-    ]);
-})->where('age_group', 'adult|baby');
-
+// Cart routes
 Route::middleware(['web'])->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
