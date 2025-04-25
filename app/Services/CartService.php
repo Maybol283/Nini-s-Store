@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Product;
+use Illuminate\Http\Request;
 
 class CartService
 {
@@ -11,10 +12,10 @@ class CartService
         return session()->get('cart', []);
     }
 
-    public function addToCart(Product $product, int $quantity, string $size, string $color)
+    public function addToCart(Product $product, int $quantity)
     {
         $cart = $this->getCart();
-        $cartItemId = $this->generateCartItemId($product->id, $size, $color);
+        $cartItemId = $this->generateCartItemId($product->id);
 
         if (isset($cart[$cartItemId])) {
             $cart[$cartItemId]['quantity'] += $quantity;
@@ -25,8 +26,6 @@ class CartService
                 'name' => $product->name,
                 'price' => $product->price,
                 'quantity' => $quantity,
-                'size' => $size,
-                'color' => $color,
                 'image' => [
                     'imageSrc' => $product->image_url,
                     'imageAlt' => $product->name,
@@ -65,27 +64,79 @@ class CartService
     public function getCartSummary()
     {
         $cart = $this->getCart();
+        $total = $this->calculateTotal($cart);
+        $itemCount = empty($cart) ? 0 : count($cart);
+
         return [
             'items' => $cart,
-            'total' => $this->calculateTotal($cart),
-            'itemCount' => count($cart)
+            'total' => (float)$total,
+            'itemCount' => (int)$itemCount
         ];
     }
 
-    private function generateCartItemId($productId, $size, $color)
+    private function generateCartItemId($productId)
     {
-        return md5($productId . $size . $color);
+        return md5($productId);
     }
 
     private function calculateTotal($cartItems)
     {
+        if (empty($cartItems)) {
+            return 0;
+        }
+
         return array_reduce($cartItems, function ($carry, $item) {
-            return $carry + ($item['price'] * $item['quantity']);
+            return $carry + ((float)$item['price'] * (int)$item['quantity']);
         }, 0);
     }
 
     private function updateCart($cart)
     {
         session()->put('cart', $cart);
+    }
+
+    public function add(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $product = Product::findOrFail($request->product_id);
+        $this->addToCart(
+            $product,
+            $request->quantity
+        );
+
+        return redirect()->back()->with('success', 'Product added to cart successfully!');
+    }
+
+    public function sync(Request $request)
+    {
+        $request->validate([
+            'items' => 'required|string',
+            'total' => 'required|numeric',
+            'itemCount' => 'required|integer',
+        ]);
+
+        try {
+            $items = json_decode($request->items, true);
+
+            session()->put('cart', [
+                'items' => $items,
+                'total' => (float)$request->total,
+                'itemCount' => (int)$request->itemCount,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cart synchronized successfully',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to synchronize cart: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

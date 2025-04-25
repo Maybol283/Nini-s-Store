@@ -38,6 +38,10 @@ export default function ShopItem({ product }: Props) {
             preserveScroll: true,
             onSuccess: () => {
                 router.reload({ only: ["cart"] });
+                console.log("Cart updated successfully");
+            },
+            onError: (error) => {
+                console.log("Error updating cart:", error);
             },
         });
     };

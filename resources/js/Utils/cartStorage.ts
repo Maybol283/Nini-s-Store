@@ -43,19 +43,31 @@ export const cartStorage = {
     },
 
     // Sync local cart with server cart
-    syncWithServer(serverCart: Cart): void {
+    syncWithServer(serverCart: Cart | undefined | null): void {
         try {
+            // Ensure serverCart is not null or undefined
+            if (!serverCart) {
+                return;
+            }
+
+            // Create a normalized server cart with default values for missing properties
+            const normalizedServerCart = {
+                items: serverCart.items || {},
+                total: serverCart.total || 0,
+                itemCount: serverCart.itemCount || 0,
+            };
+
             // If server cart is empty but we have local items, keep local items
             const localCart = this.getCart();
             if (
-                Object.keys(serverCart.items).length === 0 &&
+                Object.keys(normalizedServerCart.items).length === 0 &&
                 Object.keys(localCart.items).length > 0
             ) {
                 return;
             }
 
-            // Otherwise, update local storage with server cart
-            this.saveCart(serverCart);
+            // Otherwise, update local storage with normalized server cart
+            this.saveCart(normalizedServerCart);
         } catch (error) {
             console.error("Error syncing cart with server:", error);
         }

@@ -18,7 +18,7 @@ const Dashboard = ({ message }: { message: string }) => {
             </section>
 
             {/* Render Home Component */}
-            <section className="flex-shrink-0 w-screen snap-center">
+            <section className="flex flex-shrink-0 w-screen snap-center">
                 <Gallery />
             </section>
 

@@ -1,9 +1,22 @@
 import { ShoppingBagIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Link, usePage, router } from "@inertiajs/react";
 import { PageProps as InertiaPageProps } from "@inertiajs/core";
 import React, { useState, useEffect, Fragment } from "react";
-import { Popover, Transition, Menu } from "@headlessui/react";
+import {
+    Popover,
+    Transition,
+    Menu,
+    MenuButton,
+    MenuItem,
+    MenuItems,
+    Dialog,
+    DialogPanel,
+    PopoverPanel,
+    PopoverButton,
+} from "@headlessui/react";
 import { cartStorage } from "@/Utils/cartStorage";
+import CartPanel from "./CartPanel";
 
 interface CartItem {
     id: string;
@@ -43,13 +56,18 @@ const Header = () => {
 
     // Provide default empty cart if serverCart is undefined
     const cart = serverCart || { items: {}, total: 0, itemCount: 0 };
-    const cartItems = Object.values(cart.items);
+    // Ensure items is never undefined before using Object.values
+    const cartItems = Array.isArray(Object.values(cart.items || {}))
+        ? Object.values(cart.items || {})
+        : [];
 
     // When activeDropdown is 0, no dropdown is open.
     // Setting it to 1 will open the shop dropdown.
     const [activeDropdown, setActiveDropdown] = useState<number>(0);
     // Controls whether the dropdown element should be rendered.
     const [showDropdown, setShowDropdown] = useState(false);
+    // Mobile menu state
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const handleLogout = () => {
         router.post("/logout");
@@ -63,16 +81,25 @@ const Header = () => {
     useEffect(() => {
         // On initial load, check if we need to sync localStorage cart with server
         const localCart = cartStorage.getCart();
+        const cartItemsObj = cart?.items || {};
+
         if (
             Object.keys(localCart.items).length > 0 &&
-            Object.keys(cart.items).length === 0
+            Object.keys(cartItemsObj).length === 0
         ) {
             // If we have items in localStorage but not on server, sync to server
-            router.post("/cart/sync", {
-                items: JSON.stringify(localCart.items),
-                total: localCart.total,
-                itemCount: localCart.itemCount,
-            });
+            router.post(
+                "/cart/sync",
+                {
+                    items: JSON.stringify(localCart.items),
+                    total: localCart.total,
+                    itemCount: localCart.itemCount,
+                },
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                }
+            );
         }
     }, []);
 
@@ -97,7 +124,36 @@ const Header = () => {
         >
             <div className="mx-auto flex justify-between items-center text-outline-green">
                 <h1 className="text-2xl font-bold">Crocheted With Love</h1>
-                <nav className="flex items-center">
+
+                {/* Mobile menu button */}
+                <div className="flex md:hidden">
+                    <button
+                        type="button"
+                        className="inline-flex items-center justify-center p-2 rounded-md text-cream hover:text-pink-400"
+                        onClick={() => setMobileMenuOpen(true)}
+                    >
+                        <span className="sr-only">Open main menu</span>
+                        <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+                    </button>
+                    <Popover className="relative flex items-center ml-2">
+                        <PopoverButton className="group flex items-center p-2">
+                            <ShoppingBagIcon
+                                className="size-6 flex-shrink-0 text-cream group-hover:text-pink-400"
+                                aria-hidden="true"
+                            />
+                            <span className="ml-2 text-sm font-medium text-cream group-hover:text-pink-400">
+                                {cart.itemCount || 0}
+                            </span>
+                            <span className="sr-only">
+                                items in cart, view bag
+                            </span>
+                        </PopoverButton>
+                        <CartPanel cartItems={cartItems} position="mobile" />
+                    </Popover>
+                </div>
+
+                {/* Desktop navigation */}
+                <nav className="hidden md:flex items-center">
                     <ul className="flex items-center space-x-6 font-modak">
                         <li>
                             <Link
@@ -186,9 +242,9 @@ const Header = () => {
                                     className="relative inline-block text-left"
                                 >
                                     <div>
-                                        <Menu.Button className="inline-flex justify-center w-full hover:text-pink-400 text-outline-green font-medium">
+                                        <MenuButton className="inline-flex justify-center w-full hover:text-pink-400 text-outline-green font-medium">
                                             {user.name}
-                                        </Menu.Button>
+                                        </MenuButton>
                                     </div>
                                     <Transition
                                         as={Fragment}
@@ -199,8 +255,8 @@ const Header = () => {
                                         leaveFrom="transform opacity-100 scale-100"
                                         leaveTo="transform opacity-0 scale-95"
                                     >
-                                        <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                            <Menu.Item>
+                                        <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                            <MenuItem>
                                                 {({ active }) => (
                                                     <Link
                                                         href="/dashboard"
@@ -213,8 +269,8 @@ const Header = () => {
                                                         Dashboard
                                                     </Link>
                                                 )}
-                                            </Menu.Item>
-                                            <Menu.Item>
+                                            </MenuItem>
+                                            <MenuItem>
                                                 {({ active }) => (
                                                     <button
                                                         onClick={handleLogout}
@@ -227,8 +283,8 @@ const Header = () => {
                                                         Log out
                                                     </button>
                                                 )}
-                                            </Menu.Item>
-                                        </Menu.Items>
+                                            </MenuItem>
+                                        </MenuItems>
                                     </Transition>
                                 </Menu>
                             </li>
@@ -260,110 +316,153 @@ const Header = () => {
                                         aria-hidden="true"
                                     />
                                     <span className="ml-2 text-sm font-medium text-cream group-hover:text-pink-400">
-                                        {cart.itemCount}
+                                        {cart.itemCount || 0}
                                     </span>
                                     <span className="sr-only">
                                         items in cart, view bag
                                     </span>
                                 </Popover.Button>
-                                <Transition
-                                    as={Fragment}
-                                    enter="transition ease-out duration-200"
-                                    enterFrom="opacity-0"
-                                    enterTo="opacity-100"
-                                    leave="transition ease-in duration-150"
-                                    leaveFrom="opacity-100"
-                                    leaveTo="opacity-0"
-                                >
-                                    <Popover.Panel className="absolute inset-x-0 top-10 sm:top-8 bg-palette-3 pb-6 shadow-lg sm:px-2 lg:left-auto lg:right-0 lg:top-full lg:-mr-1.5 lg:mt-3 lg:w-80 lg:rounded-lg lg:ring-1 lg:ring-black lg:ring-opacity-5">
-                                        <h2 className="sr-only">
-                                            Shopping Cart
-                                        </h2>
-
-                                        <form className="mx-auto max-w-2xl px-4">
-                                            <ul
-                                                role="list"
-                                                className="divide-y divide-palette-1"
-                                            >
-                                                {cartItems.length === 0 ? (
-                                                    <li className="py-6 text-center">
-                                                        <p className="text-palette-1">
-                                                            No Products selected
-                                                        </p>
-                                                    </li>
-                                                ) : (
-                                                    cartItems.map((product) => (
-                                                        <li
-                                                            key={product.id}
-                                                            className="flex items-center py-6"
-                                                        >
-                                                            <Link
-                                                                href={`/shop/item/${product.product_id}`}
-                                                            >
-                                                                <div className="flex place-around pb-4">
-                                                                    <div className="h-16 w-16 flex-none rounded-md border border-gray-200">
-                                                                        <img
-                                                                            src={
-                                                                                product
-                                                                                    .image
-                                                                                    .imageSrc
-                                                                            }
-                                                                            alt={
-                                                                                product
-                                                                                    .image
-                                                                                    .imageAlt
-                                                                            }
-                                                                            className="h-full w-full object-cover object-center"
-                                                                        />
-                                                                    </div>
-                                                                    <div className="ml-4 flex-auto">
-                                                                        <h3 className="font-bold text-palette-1">
-                                                                            {
-                                                                                product.name
-                                                                            }
-                                                                        </h3>
-                                                                        <div className="text-white">
-                                                                            <p>
-                                                                                Quantity:{" "}
-                                                                                {
-                                                                                    product.quantity
-                                                                                }
-                                                                            </p>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </Link>
-                                                        </li>
-                                                    ))
-                                                )}
-                                            </ul>
-                                            <Link
-                                                href="/checkout"
-                                                className="w-full"
-                                            >
-                                                <button
-                                                    type="button"
-                                                    className="w-full rounded-md border border-transparent bg-palette-1 px-4 py-2 text-sm font-medium text-gray-500 shadow-sm hover:text-palette-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
-                                                >
-                                                    Checkout
-                                                </button>
-                                            </Link>
-                                            <p className="mt-6 text-center">
-                                                <Link
-                                                    href="/cart"
-                                                    className="text-sm font-medium text-gray-300 hover:text-palette-1"
-                                                >
-                                                    View Shopping Bag
-                                                </Link>
-                                            </p>
-                                        </form>
-                                    </Popover.Panel>
-                                </Transition>
+                                <CartPanel
+                                    cartItems={cartItems}
+                                    position="desktop"
+                                />
                             </Popover>
                         </li>
                     </ul>
                 </nav>
             </div>
+
+            {/* Mobile menu dialog */}
+            <Dialog
+                open={mobileMenuOpen}
+                onClose={setMobileMenuOpen}
+                className="relative z-40 md:hidden"
+            >
+                <div className="fixed inset-0 bg-black/25" aria-hidden="true" />
+
+                <div className="fixed inset-0 z-40 flex">
+                    <DialogPanel className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-brown px-6 py-8 shadow-xl">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-xl font-bold text-cream">
+                                Menu
+                            </h2>
+                            <button
+                                type="button"
+                                className="inline-flex items-center justify-center rounded-md text-cream hover:text-pink-400"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                <span className="sr-only">Close menu</span>
+                                <XMarkIcon
+                                    className="h-6 w-6"
+                                    aria-hidden="true"
+                                />
+                            </button>
+                        </div>
+
+                        <div className="mt-6 border-t border-pink pt-6">
+                            <nav className="grid gap-y-6">
+                                <Link
+                                    href="/"
+                                    className="text-cream hover:text-pink-400 text-lg font-modak"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    Home
+                                </Link>
+                                <Link
+                                    href="/about"
+                                    className="text-cream hover:text-pink-400 text-lg font-modak"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    About
+                                </Link>
+                                <Link
+                                    href="/shop"
+                                    className="text-cream hover:text-pink-400 text-lg font-modak"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    Shop
+                                </Link>
+                                <div className="grid grid-cols-1 gap-y-4 pl-6">
+                                    <Link
+                                        href="/shop/adults"
+                                        className="text-cream hover:text-pink-400 text-base font-modak"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        Adults
+                                    </Link>
+                                    <Link
+                                        href="/shop/babies"
+                                        className="text-cream hover:text-pink-400 text-base font-modak"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        Babies
+                                    </Link>
+                                    <Link
+                                        href="/size-guide"
+                                        className="text-cream hover:text-pink-400 text-base font-modak"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        Size Guide
+                                    </Link>
+                                </div>
+
+                                {/* Auth links */}
+                                {user ? (
+                                    <>
+                                        <Link
+                                            href="/dashboard"
+                                            className="text-cream hover:text-pink-400 text-lg font-modak"
+                                            onClick={() =>
+                                                setMobileMenuOpen(false)
+                                            }
+                                        >
+                                            Dashboard
+                                        </Link>
+                                        <button
+                                            onClick={() => {
+                                                handleLogout();
+                                                setMobileMenuOpen(false);
+                                            }}
+                                            className="text-cream hover:text-pink-400 text-lg font-modak text-left"
+                                        >
+                                            Log out
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link
+                                            href="/login"
+                                            className="text-cream hover:text-pink-400 text-lg font-modak"
+                                            onClick={() =>
+                                                setMobileMenuOpen(false)
+                                            }
+                                        >
+                                            Login
+                                        </Link>
+                                        <Link
+                                            href="/register"
+                                            className="text-cream hover:text-pink-400 text-lg font-modak"
+                                            onClick={() =>
+                                                setMobileMenuOpen(false)
+                                            }
+                                        >
+                                            Register
+                                        </Link>
+                                    </>
+                                )}
+
+                                <Link
+                                    href="/cart"
+                                    className="text-cream hover:text-pink-400 text-lg font-modak"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    Cart ({cart.itemCount || 0})
+                                </Link>
+                            </nav>
+                        </div>
+                    </DialogPanel>
+                </div>
+            </Dialog>
         </header>
     );
 };

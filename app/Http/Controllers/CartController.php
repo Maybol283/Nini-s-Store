@@ -32,17 +32,13 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1',
-            'size' => 'required|string',
-            'color' => 'required|string',
+
         ]);
 
         $product = Product::findOrFail($request->product_id);
         $this->cartService->addToCart(
             $product,
-            $request->quantity,
-            $request->size,
-            $request->color
+            $request->quantity
         );
 
         return redirect()->back()->with('success', 'Product added to cart successfully!');
@@ -104,15 +100,9 @@ class CartController extends Controller
             // Store in session
             session()->put('cart', $items);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Cart synchronized successfully',
-            ]);
+            return redirect()->back()->with('success', 'Cart cleared successfully!');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to synchronize cart',
-            ], 500);
+            return redirect()->back()->with('error', 'Failed to synchronize cart');
         }
     }
 }

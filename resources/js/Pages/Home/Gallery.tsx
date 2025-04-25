@@ -28,14 +28,16 @@ const pictures = {
 
 export default function Gallery() {
     const [currentGallery, setCurrentGallery] = useState(pictures.gallery);
+    const [isMobile, setIsMobile] = useState(false);
     const [visible, setVisible] = useState(false);
 
     // Switch images based on screen width
     useEffect(() => {
         const updateGallery = () => {
-            const isMobile = window.innerWidth <= 768;
+            const mobile = window.innerWidth <= 768;
+            setIsMobile(mobile);
             setCurrentGallery(
-                isMobile ? pictures.gallery_mobile : pictures.gallery
+                mobile ? pictures.gallery_mobile : pictures.gallery
             );
         };
         updateGallery();
@@ -43,8 +45,8 @@ export default function Gallery() {
         return () => window.removeEventListener("resize", updateGallery);
     }, []);
 
-    // We only want the first 8 images for this "featured" view
-    const featuredImages = currentGallery.slice(0, 8);
+    // We want 8 images for desktop view and 4 for mobile view
+    const featuredImages = currentGallery.slice(0, isMobile ? 4 : 8);
 
     // Intersection Observer: container in view triggers the animation
     const [ref, inView] = useInView({
@@ -60,43 +62,50 @@ export default function Gallery() {
     }, [inView]);
 
     return (
-        <div className="container mx-auto px-4 py-8 flex flex-col">
-            <h2 className="text-3xl font-semibold mb-6 text-center">Gallery</h2>
-            <div
-                ref={ref}
-                className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 flex-grow"
-            >
-                {featuredImages.map((image, index) => (
-                    <div
-                        key={index}
-                        className={`group relative bg-white rounded-lg shadow overflow-hidden transition-all duration-700 transform ${
-                            visible
-                                ? "opacity-100 translate-y-0"
-                                : "opacity-0 translate-y-5"
-                        }`}
-                        style={{
-                            transitionDelay: `${index * 100}ms`,
-                        }}
-                    >
-                        <div className="aspect-square w-full overflow-hidden">
-                            <img
-                                src={image.url}
-                                alt={image.alt}
-                                className="h-full w-full object-cover object-center transition-opacity group-hover:opacity-90"
-                                loading="lazy"
-                            />
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            <div className="mt-6 md:mt-24 text-center">
-                <Link
-                    href="/"
-                    className="inline-block bg-cream text-green border border-green px-6 py-3 rounded-md hover:bg-green hover:text-cream transition-colors duration-300 font-medium"
+        <div className="w-screen h-full flex items-center justify-center py-12">
+            <div className="container mx-auto px-4 max-w-6xl">
+                <h2 className="text-3xl font-semibold mb-8 text-center">
+                    Gallery
+                </h2>
+                <div
+                    ref={ref}
+                    className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mx-auto"
+                    style={{
+                        maxWidth: "calc(min(100%, 90vh * 1.33))",
+                    }}
                 >
-                    View All Images
-                </Link>
+                    {featuredImages.map((image, index) => (
+                        <div
+                            key={index}
+                            className={`group relative rounded-lg shadow overflow-hidden transition-all duration-700 transform ${
+                                visible
+                                    ? "opacity-100 translate-y-0"
+                                    : "opacity-0 translate-y-5"
+                            }`}
+                            style={{
+                                transitionDelay: `${index * 100}ms`,
+                            }}
+                        >
+                            <div className="aspect-square w-full overflow-hidden">
+                                <img
+                                    src={image.url}
+                                    alt={image.alt}
+                                    className="h-full w-full object-cover object-center transition-opacity group-hover:opacity-90"
+                                    loading="lazy"
+                                />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="mt-10 text-center">
+                    <Link
+                        href="/"
+                        className="inline-block bg-cream text-green border border-green px-6 py-3 rounded-md hover:bg-green hover:text-cream transition-colors duration-300 font-medium"
+                    >
+                        View All Images
+                    </Link>
+                </div>
             </div>
         </div>
     );
