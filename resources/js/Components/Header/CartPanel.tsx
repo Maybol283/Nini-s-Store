@@ -2,6 +2,7 @@ import { Link, router } from "@inertiajs/react";
 import React, { Fragment } from "react";
 import { Transition } from "@headlessui/react";
 import { formatCurrency } from "../../Utils/helpers";
+import { cartStorage } from "@/Utils/cartStorage";
 
 interface CartItem {
     id: string;
@@ -35,10 +36,21 @@ const CartPanel = ({ cartItems, position = "desktop" }: CartPanelProps) => {
 
     // Handle removing an item from the cart
     const handleRemoveItem = (itemId: string) => {
+        // First update local storage to maintain UI consistency
+        cartStorage.removeItem(itemId);
+
+        // Then send delete request to server
         router.delete(`/cart/remove/${itemId}`, {
             preserveScroll: true,
+            onBefore: () => {
+                console.log("Removing item:", itemId);
+                return true;
+            },
             onSuccess: () => {
                 console.log("Item removed successfully");
+            },
+            onError: (errors) => {
+                console.error("Failed to remove item:", errors);
             },
         });
     };

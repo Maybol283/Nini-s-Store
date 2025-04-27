@@ -9,7 +9,14 @@ class CartService
 {
     public function getCart()
     {
-        return session()->get('cart', []);
+        $cart = session()->get('cart', ['items' => [], 'total' => 0, 'itemCount' => 0]);
+
+        // If the cart is just an array of items without proper structure, normalize it
+        if (isset($cart) && !isset($cart['items'])) {
+            return ['items' => $cart, 'total' => $this->calculateTotal($cart), 'itemCount' => count($cart)];
+        }
+
+        return $cart;
     }
 
     public function addToCart(Product $product, int $quantity)
@@ -17,42 +24,84 @@ class CartService
         $cart = $this->getCart();
         $cartItemId = $this->generateCartItemId($product->id);
 
-        if (isset($cart[$cartItemId])) {
-            $cart[$cartItemId]['quantity'] += $quantity;
+        if (isset($cart['items'][$cartItemId])) {
+            $cart['items'][$cartItemId]['quantity'] += $quantity;
         } else {
-            $cart[$cartItemId] = [
+            // Get product image data from the JSON field
+            $productImages = is_array($product->images) ? $product->images : json_decode($product->images, true);
+
+
+            // The database already stores the path as "/storage/products/..."
+            $imageUrl = !empty($productImages) && isset($productImages[0]['imageSrc'])
+                ? $productImages[0]['imageSrc']
+                : '/storage/products/default.jpg';
+
+            $imageAlt = !empty($productImages) && isset($productImages[0]['imageAlt'])
+                ? $productImages[0]['imageAlt']
+                : $product->name;
+
+            $cart['items'][$cartItemId] = [
                 'id' => $cartItemId,
                 'product_id' => $product->id,
                 'name' => $product->name,
                 'price' => $product->price,
                 'quantity' => $quantity,
                 'image' => [
-                    'imageSrc' => $product->image_url,
-                    'imageAlt' => $product->name,
+                    'imageSrc' => $imageUrl,
+                    'imageAlt' => $imageAlt,
                 ],
                 'category' => $product->category,
             ];
         }
 
-        $this->updateCart($cart);
+        // Update total and itemCount
+        $cart['total'] = $this->calculateTotal($cart['items']);
+        $cart['itemCount'] = array_reduce($cart['items'], function ($sum, $item) {
+            return $sum + $item['quantity'];
+        }, 0);
+
+        // Store the updated cart
+        session()->put('cart', $cart);
+
         return $cart;
     }
 
     public function removeFromCart(string $cartItemId)
     {
         $cart = $this->getCart();
-        unset($cart[$cartItemId]);
-        $this->updateCart($cart);
+
+        // Remove the item from the items array
+        if (isset($cart['items'][$cartItemId])) {
+            unset($cart['items'][$cartItemId]);
+
+            // Update total and itemCount
+            $cart['total'] = $this->calculateTotal($cart['items']);
+            $cart['itemCount'] = count($cart['items']);
+
+            // Store the updated cart
+            session()->put('cart', $cart);
+        }
+
         return $cart;
     }
 
     public function updateQuantity(string $cartItemId, int $quantity)
     {
         $cart = $this->getCart();
-        if (isset($cart[$cartItemId])) {
-            $cart[$cartItemId]['quantity'] = $quantity;
-            $this->updateCart($cart);
+
+        if (isset($cart['items'][$cartItemId])) {
+            $cart['items'][$cartItemId]['quantity'] = $quantity;
+
+            // Update total and itemCount
+            $cart['total'] = $this->calculateTotal($cart['items']);
+            $cart['itemCount'] = array_reduce($cart['items'], function ($sum, $item) {
+                return $sum + $item['quantity'];
+            }, 0);
+
+            // Store the updated cart
+            session()->put('cart', $cart);
         }
+
         return $cart;
     }
 
@@ -64,14 +113,9 @@ class CartService
     public function getCartSummary()
     {
         $cart = $this->getCart();
-        $total = $this->calculateTotal($cart);
-        $itemCount = empty($cart) ? 0 : count($cart);
 
-        return [
-            'items' => $cart,
-            'total' => (float)$total,
-            'itemCount' => (int)$itemCount
-        ];
+        // The cart already has the correct structure with items, total, and itemCount
+        return $cart;
     }
 
     private function generateCartItemId($productId)
@@ -85,14 +129,23 @@ class CartService
             return 0;
         }
 
+        // Check if the cart items are nested under 'items' key
+        if (isset($cartItems['items'])) {
+            $cartItems = $cartItems['items'];
+        }
+
+        // If after potential unwrapping, we still have nothing, return 0
+        if (empty($cartItems)) {
+            return 0;
+        }
+
         return array_reduce($cartItems, function ($carry, $item) {
+            // Add additional check to ensure price and quantity exist
+            if (!isset($item['price']) || !isset($item['quantity'])) {
+                return $carry;
+            }
             return $carry + ((float)$item['price'] * (int)$item['quantity']);
         }, 0);
-    }
-
-    private function updateCart($cart)
-    {
-        session()->put('cart', $cart);
     }
 
     public function add(Request $request)
@@ -121,6 +174,17 @@ class CartService
 
         try {
             $items = json_decode($request->items, true);
+
+            // Ensure each item has valid image data
+            foreach ($items as $key => $item) {
+                if (!isset($item['image']) || !isset($item['image']['imageSrc'])) {
+                    // Add default image if missing
+                    $items[$key]['image'] = [
+                        'imageSrc' => '/storage/products/default.jpg',
+                        'imageAlt' => $item['name'] ?? 'Product image'
+                    ];
+                }
+            }
 
             session()->put('cart', [
                 'items' => $items,

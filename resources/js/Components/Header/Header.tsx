@@ -98,6 +98,12 @@ const Header = () => {
                 {
                     preserveState: true,
                     preserveScroll: true,
+                    onError: (errors) => {
+                        console.error("Cart sync failed:", errors);
+                    },
+                    onSuccess: () => {
+                        console.log("Cart synced successfully");
+                    },
                 }
             );
         }

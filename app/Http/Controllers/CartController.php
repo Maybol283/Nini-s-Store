@@ -97,10 +97,14 @@ class CartController extends Controller
         try {
             $items = json_decode($request->items, true);
 
-            // Store in session
-            session()->put('cart', $items);
+            // Store in session with proper structure
+            session()->put('cart', [
+                'items' => $items,
+                'total' => (float)$request->total,
+                'itemCount' => (int)$request->itemCount,
+            ]);
 
-            return redirect()->back()->with('success', 'Cart cleared successfully!');
+            return redirect()->back();
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to synchronize cart');
         }
