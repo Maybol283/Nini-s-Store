@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Product;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Stripe\Exception\ApiErrorException;
+
+use function Laravel\Prompts\confirm;
 
 class CheckoutController extends Controller
 {
@@ -37,6 +40,7 @@ class CheckoutController extends Controller
                     'metadata' => [
                         'cart_id' => session()->getId(),
                     ],
+
                 ]);
 
                 // Render the checkout page with stripe data
@@ -83,6 +87,7 @@ class CheckoutController extends Controller
                 'metadata' => [
                     'cart_id' => session()->getId(),
                 ],
+
             ]);
 
             // Debug the paymentIntent to see what we're getting
@@ -122,17 +127,40 @@ class CheckoutController extends Controller
                 ], 400);
             }
 
+            /*
+            //While testing, we don't want to mark items as out of stock
+
+            $cart = session('cart', ['items' => [], 'total' => 0, 'itemCount' => 0]);
+            $cartItems = $cart['items'] ?? [];
+
+            // Mark each purchased item as out of stock
+            foreach ($cartItems as $item) {
+                // Skip if product id is missing
+                if (!isset($item['product_id'])) {
+                    continue;
+                }
+
+                $product = Product::find($item['product_id']);
+                if ($product) {
+                    // Mark as out of stock since each item is unique
+                    $product->in_stock = false;
+                    $product->save();
+
+                    // Log the inventory update
+                    logger()->info('Product marked as sold', [
+                        'product_id' => $product->id,
+                        'product_name' => $product->name
+                    ]);
+                }
+            }
+                */
+
             // Create the order in your database
             // TODO: Implement order creation logic
 
-            // Clear the cart
-            if (session()->has('cart')) {
-                session()->forget('cart');
-            }
-
-            return response()->json([
-                'success' => true,
-            ]);
+            // Clear the cart from session
+            session()->forget('cart');
+            return redirect()->route('checkout.thank-you');
         } catch (\Exception $e) {
             logger()->error('Error processing payment', ['error' => $e->getMessage()]);
 

@@ -4,7 +4,7 @@ import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 
 // Initialize Inertia with proper error handling
 createInertiaApp({
-    title: (title) => `${title} - Nini's Store`,
+    title: (title) => `Nini's Store`,
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.tsx`,

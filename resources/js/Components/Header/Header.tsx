@@ -88,24 +88,11 @@ const Header = () => {
             Object.keys(cartItemsObj).length === 0
         ) {
             // If we have items in localStorage but not on server, sync to server
-            router.post(
-                "/cart/sync",
-                {
-                    items: JSON.stringify(localCart.items),
-                    total: localCart.total,
-                    itemCount: localCart.itemCount,
-                },
-                {
-                    preserveState: true,
-                    preserveScroll: true,
-                    onError: (errors) => {
-                        console.error("Cart sync failed:", errors);
-                    },
-                    onSuccess: () => {
-                        console.log("Cart synced successfully");
-                    },
-                }
-            );
+            router.post("/cart/sync", {
+                items: JSON.stringify(localCart.items),
+                total: localCart.total,
+                itemCount: localCart.itemCount,
+            });
         }
     }, []);
 

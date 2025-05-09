@@ -6,7 +6,7 @@ import {
     PopoverPanel,
 } from "@headlessui/react";
 import ShopLayout from "@/Layouts/ShopLayout";
-import { usePage } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import { CartItem, Cart, PageProps } from "@/types";
 import { useState, useEffect } from "react";
 import { loadStripe } from "@stripe/stripe-js";
@@ -18,7 +18,7 @@ import {
     useElements,
     AddressElement,
 } from "@stripe/react-stripe-js";
-import axios from "axios";
+import { cartStorage } from "@/Utils/cartStorage";
 
 const Billings = {
     VAT: 0.2,
@@ -257,6 +257,7 @@ function CheckoutForm() {
     const elements = useElements();
     const [message, setMessage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isProcessingOrder, setIsProcessingOrder] = useState(false);
 
     useEffect(() => {
         if (!stripe) {
@@ -279,8 +280,13 @@ function CheckoutForm() {
                     switch (paymentIntent.status) {
                         case "succeeded":
                             setMessage("Payment succeeded!");
+                            // Clear cart locally BEFORE processing
+                            cartStorage.clearCart();
+                            setIsProcessingOrder(true);
                             // Process the successful payment on the server
-                            processPayment(paymentIntent.id);
+                            router.post("/checkout/process-payment", {
+                                payment_intent_id: paymentIntent.id,
+                            });
                             break;
                         case "processing":
                             setMessage("Your payment is processing.");
@@ -298,23 +304,6 @@ function CheckoutForm() {
         }
     }, [stripe]);
 
-    const processPayment = async (paymentIntentId: string) => {
-        try {
-            const response = await axios.post("/checkout/process-payment", {
-                payment_intent_id: paymentIntentId,
-            });
-
-            if (response.data.success) {
-                // Redirect to the thank you page
-                window.location.href = "/checkout/thank-you";
-            }
-        } catch (error) {
-            setMessage(
-                "Error processing your payment. Please contact support."
-            );
-        }
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -328,7 +317,7 @@ function CheckoutForm() {
         const { error } = await stripe.confirmPayment({
             elements,
             confirmParams: {
-                // Make sure to change this to your payment completion page
+                // Return directly to the thank you page for a cleaner URL flow
                 return_url: `${window.location.origin}/checkout`,
             },
         });
@@ -344,6 +333,29 @@ function CheckoutForm() {
 
         setIsLoading(false);
     };
+
+    // If we're processing the order, show a processing spinner
+    if (isProcessingOrder) {
+        return (
+            <div className="text-center py-12">
+                <div
+                    className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-current border-r-transparent text-brown align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                >
+                    <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+                        Processing order...
+                    </span>
+                </div>
+                <p className="mt-4 text-lg font-medium text-brown">
+                    Processing your order...
+                </p>
+                <p className="mt-2 text-sm text-brown">
+                    Please do not close this page. You will be redirected to the
+                    confirmation page shortly.
+                </p>
+            </div>
+        );
+    }
 
     return (
         <form id="payment-form" onSubmit={handleSubmit}>

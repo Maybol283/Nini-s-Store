@@ -4,7 +4,7 @@ import Footer from "@/Components/Header/Footer";
 
 function ShopLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="min-h-svh bg-cream flex flex-col">
+        <div className="min-h-svh bg-cream flex flex-col font-sans">
             <Header />
             <main className="flex-grow overflow-auto scrollbar-bottom">
                 {children}
