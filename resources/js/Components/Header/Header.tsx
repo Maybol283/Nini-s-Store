@@ -131,8 +131,8 @@ const Header = () => {
             <div className="mx-auto flex justify-between items-center text-outline-green">
                 <h1 className="text-2xl font-bold">Crocheted With Love</h1>
 
-                {/* Mobile menu button */}
-                <div className="flex md:hidden">
+                {/* Mobile menu button - change md to lg */}
+                <div className="flex lg:hidden">
                     <button
                         type="button"
                         className="inline-flex items-center justify-center p-2 rounded-md text-cream hover:text-pink-400"
@@ -142,24 +142,31 @@ const Header = () => {
                         <Bars3Icon className="h-6 w-6" aria-hidden="true" />
                     </button>
                     <Popover className="relative flex items-center ml-2">
-                        <PopoverButton className="group flex items-center p-2">
-                            <ShoppingBagIcon
-                                className="size-6 flex-shrink-0 text-cream group-hover:text-pink-400"
-                                aria-hidden="true"
-                            />
-                            <span className="ml-2 text-sm font-medium text-cream group-hover:text-pink-400">
-                                {cart.itemCount || 0}
-                            </span>
-                            <span className="sr-only">
-                                items in cart, view bag
-                            </span>
-                        </PopoverButton>
-                        <CartPanel cartItems={cartItems} position="mobile" />
+                        {({ open }) => (
+                            <>
+                                <PopoverButton className="group flex items-center p-2">
+                                    <ShoppingBagIcon
+                                        className="size-6 flex-shrink-0 text-cream group-hover:text-pink-400"
+                                        aria-hidden="true"
+                                    />
+                                    <span className="ml-2 text-sm font-medium text-cream group-hover:text-pink-400">
+                                        {cart.itemCount || 0}
+                                    </span>
+                                    <span className="sr-only">
+                                        items in cart, view bag
+                                    </span>
+                                </PopoverButton>
+                                <CartPanel
+                                    cartItems={cartItems}
+                                    position="mobile"
+                                />
+                            </>
+                        )}
                     </Popover>
                 </div>
 
-                {/* Desktop navigation */}
-                <nav className="hidden md:flex items-center">
+                {/* Desktop navigation - change md to lg */}
+                <nav className="hidden lg:flex items-center">
                     <ul className="flex items-center space-x-6 font-modak">
                         <li>
                             <Link
@@ -316,22 +323,26 @@ const Header = () => {
                         )}
                         <li>
                             <Popover className="relative flex items-center">
-                                <Popover.Button className="group flex items-center p-2">
-                                    <ShoppingBagIcon
-                                        className="size-6 flex-shrink-0 text-cream group-hover:text-pink-400"
-                                        aria-hidden="true"
-                                    />
-                                    <span className="ml-2 text-sm font-medium text-cream group-hover:text-pink-400">
-                                        {cart.itemCount || 0}
-                                    </span>
-                                    <span className="sr-only">
-                                        items in cart, view bag
-                                    </span>
-                                </Popover.Button>
-                                <CartPanel
-                                    cartItems={cartItems}
-                                    position="desktop"
-                                />
+                                {({ open }) => (
+                                    <>
+                                        <Popover.Button className="group flex items-center p-2">
+                                            <ShoppingBagIcon
+                                                className="size-6 flex-shrink-0 text-cream group-hover:text-pink-400"
+                                                aria-hidden="true"
+                                            />
+                                            <span className="ml-2 text-sm font-medium text-cream group-hover:text-pink-400">
+                                                {cart.itemCount || 0}
+                                            </span>
+                                            <span className="sr-only">
+                                                items in cart, view bag
+                                            </span>
+                                        </Popover.Button>
+                                        <CartPanel
+                                            cartItems={cartItems}
+                                            position="desktop"
+                                        />
+                                    </>
+                                )}
                             </Popover>
                         </li>
                     </ul>
@@ -342,7 +353,7 @@ const Header = () => {
             <Dialog
                 open={mobileMenuOpen}
                 onClose={setMobileMenuOpen}
-                className="relative z-40 md:hidden"
+                className="relative z-40 lg:hidden"
             >
                 <div className="fixed inset-0 bg-black/25" aria-hidden="true" />
 

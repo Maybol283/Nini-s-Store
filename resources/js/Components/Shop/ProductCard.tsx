@@ -49,7 +49,7 @@ export default function ProductCard({
                             ? product.images[0].imageAlt
                             : product.name
                     }
-                    className="h-full w-full object-cover object-center transition-opacity group-hover:opacity-90"
+                    className="h-full w-full object-cover object-center transition-opacity group-hover:opacity-90 z-10"
                 />
             </div>
             <div className="p-4">

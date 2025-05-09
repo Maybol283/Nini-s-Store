@@ -6,11 +6,6 @@ import {
     Disclosure,
     DisclosureButton,
     DisclosurePanel,
-    Tab,
-    TabGroup,
-    TabList,
-    TabPanel,
-    TabPanels,
 } from "@headlessui/react";
 import {
     MagnifyingGlassIcon,
@@ -22,8 +17,18 @@ import { ChevronDownIcon, PlusIcon } from "@heroicons/react/20/solid";
 import ShopLayout from "@/Layouts/ShopLayout";
 import { useTrail, useTransition, a } from "@react-spring/web";
 import { Link, router } from "@inertiajs/react";
-import { Product } from "@/types";
+import {
+    Product,
+    Auth,
+    Cart,
+    CartItem,
+    ProductForm,
+    ImageError,
+    Filters,
+    ProductCardProps,
+} from "@/types";
 import ProductCard from "@/Components/Shop/ProductCard";
+import { CartPanelProps } from "@/types";
 
 interface Props {
     ageGroup: string;
@@ -68,7 +73,7 @@ const sizes: {
     ],
 };
 
-const filterOptions = [
+const initialFilterOptions = [
     {
         id: "category",
         name: "Category",
@@ -97,12 +102,26 @@ export default function ShopBrowse({
         size: [] as string[],
     });
 
+    // Convert filterOptions to a state variable
+    const [filterOptions, setFilterOptions] = useState(initialFilterOptions);
+
     // Set the appropriate size options based on age group
     useEffect(() => {
         if (typeof ageGroup === "string" && ageGroup in sizes) {
-            filterOptions[1].options = sizes[ageGroup];
+            setFilterOptions((prevOptions) => {
+                // Create a new array to ensure React detects the change
+                return prevOptions.map((option) =>
+                    option.id === "size"
+                        ? { ...option, options: sizes[ageGroup] }
+                        : option
+                );
+            });
         } else {
-            filterOptions[1].options = [];
+            setFilterOptions((prevOptions) => {
+                return prevOptions.map((option) =>
+                    option.id === "size" ? { ...option, options: [] } : option
+                );
+            });
         }
     }, [ageGroup]);
 
@@ -198,7 +217,13 @@ export default function ShopBrowse({
 
         // Always make sure size options are populated based on the original age group
         if (typeof ageGroup === "string" && ageGroup in sizes) {
-            filterOptions[1].options = sizes[ageGroup];
+            setFilterOptions((prevOptions) => {
+                return prevOptions.map((option) =>
+                    option.id === "size"
+                        ? { ...option, options: sizes[ageGroup] }
+                        : option
+                );
+            });
         }
 
         // Check if all filters are cleared and we should go back to the base URL

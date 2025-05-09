@@ -1,82 +1,21 @@
 import { Config } from "ziggy-js";
+import { FormDataConvertible } from "@inertiajs/core";
 
-export interface User {
-    id: number;
-    name: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    owner: string;
-    photo: string;
-    deleted_at: string;
-    account: Account;
+// Base interfaces
+export interface Image {
+    imageSrc: string;
+    imageAlt: string;
 }
 
-export interface Account {
-    id: number;
-    name: string;
-    users: User[];
-    contacts: Contact[];
-    organizations: Organization[];
+export interface Auth {
+    user: {
+        id: number;
+        name: string;
+        email: string;
+    } | null;
 }
 
-export interface Contact {
-    id: number;
-    name: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    region: string;
-    country: string;
-    postal_code: string;
-    deleted_at: string;
-    organization_id: number;
-    organization: Organization;
-}
-
-export interface Organization {
-    id: number;
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    region: string;
-    country: string;
-    postal_code: string;
-    deleted_at: string;
-    contacts: Contact[];
-}
-
-export type PaginatedData<T> = {
-    data: T[];
-    links: {
-        first: string;
-        last: string;
-        prev: string | null;
-        next: string | null;
-    };
-
-    meta: {
-        current_page: number;
-        from: number;
-        last_page: number;
-        path: string;
-        per_page: number;
-        to: number;
-        total: number;
-
-        links: {
-            url: null | string;
-            label: string;
-            active: boolean;
-        }[];
-    };
-};
-
+// Product related interfaces
 export interface Product {
     id: number;
     name: string;
@@ -85,35 +24,84 @@ export interface Product {
     category: "scarves" | "sweaters" | "hats" | "gloves" | "miscellaneous";
     age_group: "adult" | "baby";
     sizes: string[];
-    images: {
-        imageSrc: string;
-        imageAlt: string;
-    }[];
+    images: Image[];
     in_stock: boolean;
     stock_quantity: number;
+    created_at?: string;
 }
 
+export interface ProductForm {
+    name: string;
+    price: number;
+    description: string;
+    category: string;
+    age_group: string;
+    size: string;
+    images: File[];
+    inStock: boolean;
+    [key: string]: FormDataConvertible | FormDataConvertible[] | undefined;
+}
+
+export interface ImageError {
+    file: File;
+    error: string;
+}
+
+// Cart related interfaces
+export interface CartItem {
+    id: string;
+    product_id: number;
+    name: string;
+    price: number;
+    quantity: number;
+    image: Image;
+    category: string;
+}
+
+export interface Cart {
+    items: CartItem[];
+    total: number;
+    itemCount: number;
+}
+
+// Component Props interfaces
+export interface ProductCardProps {
+    product: Product;
+    style?: any;
+    className?: string;
+    showDescription?: boolean;
+    truncateDescription?: boolean;
+    onClick?: () => void;
+}
+
+export interface CartPanelProps {
+    cartItems: CartItem[];
+    position?: "mobile" | "desktop";
+}
+
+export interface Filters {
+    search: string;
+    category: string;
+    age_group: string;
+    stock_status: string;
+    sort: string;
+    direction: string;
+}
+
+// Page Props
 export type PageProps<
     T extends Record<string, unknown> = Record<string, unknown>
 > = T & {
-    auth: {
-        user: {
-            id: number;
-            name: string;
-            email: string;
-        };
-    };
+    auth: Auth;
     flash: {
         success: string | null;
         error: string | null;
+        stripe_payment_intent?: string | null;
+        clientSecret?: string | null;
     };
     ziggy: Config & { location: string };
+    cart: Cart;
+    stripeKey?: string;
+    clientSecret?: string;
+    stripeError?: string;
 };
-
-declare module "@inertiajs/core" {
-    interface PageProps {
-        "Shop/ShopItem": {
-            product: Product;
-        };
-    }
-}
