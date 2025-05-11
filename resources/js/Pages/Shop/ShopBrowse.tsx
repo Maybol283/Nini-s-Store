@@ -8,27 +8,15 @@ import {
     DisclosurePanel,
 } from "@headlessui/react";
 import {
-    MagnifyingGlassIcon,
-    ShoppingBagIcon,
     XMarkIcon,
     AdjustmentsHorizontalIcon,
 } from "@heroicons/react/24/outline";
 import { ChevronDownIcon, PlusIcon } from "@heroicons/react/20/solid";
 import ShopLayout from "@/Layouts/ShopLayout";
-import { useTrail, useTransition, a } from "@react-spring/web";
-import { Link, router } from "@inertiajs/react";
-import {
-    Product,
-    Auth,
-    Cart,
-    CartItem,
-    ProductForm,
-    ImageError,
-    Filters,
-    ProductCardProps,
-} from "@/types";
+import { useTransition, a } from "@react-spring/web";
+import { router } from "@inertiajs/react";
+import { Product } from "@/types";
 import ProductCard from "@/Components/Shop/ProductCard";
-import { CartPanelProps } from "@/types";
 
 interface Props {
     ageGroup: string;

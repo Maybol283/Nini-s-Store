@@ -9,7 +9,11 @@ use Illuminate\Http\Request;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Stripe\Exception\ApiErrorException;
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderCompleted;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use function Laravel\Prompts\confirm;
 
 class CheckoutController extends Controller
@@ -111,10 +115,26 @@ class CheckoutController extends Controller
 
     public function processPayment(Request $request)
     {
-        // Validate the payment was successful
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'payment_intent_id' => 'required|string',
+            'shipping.name' => 'required|string',
+            'shipping.address.line1' => 'required|string',
+            'shipping.address.line2' => 'nullable|string',
+            'shipping.address.city' => 'required|string',
+            'shipping.address.postal_code' => 'required|string',
+            'shipping.address.country' => 'required|string',
+            'email' => 'required|email',
+            'total_amount' => 'required|numeric|min:0.50',
         ]);
+
+        if ($validator->fails()) {
+            Log::error('Validation failed', [
+                'errors' => $validator->errors()->toArray(),
+                'request_data' => $request->all()
+            ]);
+
+            return back()->withErrors($validator->errors());
+        }
 
         try {
             // Verify the payment with Stripe
@@ -127,39 +147,54 @@ class CheckoutController extends Controller
                 ], 400);
             }
 
-            /*
-            //While testing, we don't want to mark items as out of stock
-
             $cart = session('cart', ['items' => [], 'total' => 0, 'itemCount' => 0]);
-            $cartItems = $cart['items'] ?? [];
 
-            // Mark each purchased item as out of stock
-            foreach ($cartItems as $item) {
-                // Skip if product id is missing
-                if (!isset($item['product_id'])) {
-                    continue;
-                }
+            // Create the order
+            $order = Order::create([
+                'user_id' => Auth::check() ? Auth::id() : null,
+                'total_amount' => $request->total_amount,
+                'status' => 'processing',
+                'shipping_name' => $request->shipping['name'],
+                'shipping_email' => $request->email,
+                'shipping_address_line1' => $request->shipping['address']['line1'],
+                'shipping_address_line2' => $request->shipping['address']['line2'] ?? null,
+                'shipping_city' => $request->shipping['address']['city'],
+                'shipping_postal_code' => $request->shipping['address']['postal_code'],
+                'shipping_country' => $request->shipping['address']['country'],
+            ]);
 
+            // Create order items and update inventory
+            foreach ($cart['items'] as $item) {
                 $product = Product::find($item['product_id']);
-                if ($product) {
-                    // Mark as out of stock since each item is unique
-                    $product->in_stock = false;
-                    $product->save();
 
-                    // Log the inventory update
-                    logger()->info('Product marked as sold', [
-                        'product_id' => $product->id,
-                        'product_name' => $product->name
-                    ]);
-                }
+                // Create order item
+                $order->items()->create([
+                    'product_id' => $item['product_id'],
+                    'product_name' => $product->name,
+                    'price' => $item['price'],
+                    'quantity' => $item['quantity'],
+                    'size' => $product->size,
+                ]);
+
+                // Mark product as out of stock (Remove for production)
+                /*$product->in_stock = false;
+                $product->save();*/
+
+                // Log the inventory update
+                logger()->info('Product marked as sold', [
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+                    'order_id' => $order->id
+                ]);
             }
-                */
 
-            // Create the order in your database
-            // TODO: Implement order creation logic
+            // Send order confirmation email
+            Mail::to($order->shipping_email)
+                ->send(new OrderCompleted($order));
 
             // Clear the cart from session
             session()->forget('cart');
+
             return redirect()->route('checkout.thank-you');
         } catch (\Exception $e) {
             logger()->error('Error processing payment', ['error' => $e->getMessage()]);

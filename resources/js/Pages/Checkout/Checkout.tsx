@@ -33,6 +33,8 @@ export default function Checkout() {
     const [error, setError] = useState<string | null>(stripeError || null);
     const [stripePromise, setStripePromise] = useState<any>(null);
 
+    console.log(cart.items);
+
     // Calculate total amount including VAT and shipping
     const totalAmount = (
         cart.total +
@@ -65,190 +67,185 @@ export default function Checkout() {
         : undefined;
 
     return (
-        <ShopLayout>
-            <div className="bg-cream font-sans">
-                {/* Background color split screen for large screens */}
-                <div
-                    aria-hidden="true"
-                    className="fixed left-0 top-0 hidden h-full w-1/2 bg-cream lg:block"
-                />
-                <div
-                    aria-hidden="true"
-                    className="fixed right-0 top-0 hidden h-full w-1/2 bg-beige lg:block"
-                />
+        <div className="bg-cream font-sans">
+            {/* Background color split screen for large screens */}
+            <div
+                aria-hidden="true"
+                className="fixed left-0 top-0 hidden h-full w-1/2 bg-cream lg:block"
+            />
+            <div
+                aria-hidden="true"
+                className="fixed right-0 top-0 hidden h-full w-1/2 bg-beige lg:block"
+            />
 
-                <main className="relative mx-auto grid max-w-7xl grid-cols-1 gap-x-16 lg:grid-cols-2 lg:px-8 xl:gap-x-48">
-                    <h1 className="sr-only">Order information</h1>
+            <main className="relative mx-auto grid max-w-7xl grid-cols-1 gap-x-16 lg:grid-cols-2 lg:px-8 xl:gap-x-48">
+                <h1 className="sr-only">Order information</h1>
 
-                    <section
-                        aria-labelledby="summary-heading"
-                        className="bg-beige px-4 pb-10 pt-16 sm:px-6 lg:col-start-2 lg:row-start-1 lg:bg-transparent lg:px-0 lg:pb-16"
-                    >
-                        <div className="mx-auto max-w-lg lg:max-w-none">
+                <section
+                    aria-labelledby="summary-heading"
+                    className="bg-beige px-4 pb-10 pt-16 sm:px-6 lg:col-start-2 lg:row-start-1 lg:bg-transparent lg:px-0 lg:pb-16"
+                >
+                    <div className="mx-auto max-w-lg lg:max-w-none">
+                        <h2
+                            id="summary-heading"
+                            className="text-lg font-medium text-brown"
+                        >
+                            Order summary
+                        </h2>
+
+                        <ul
+                            role="list"
+                            className="divide-y divide-brown/20 text-sm font-medium text-green"
+                        >
+                            {cartItems.map((item) => (
+                                <li
+                                    key={item.id}
+                                    className="flex items-start space-x-4 py-6"
+                                >
+                                    <img
+                                        alt={item.image.imageAlt}
+                                        src={item.image.imageSrc}
+                                        className="size-20 flex-none rounded-md object-cover"
+                                    />
+                                    <div className="flex-auto space-y-1">
+                                        <h3>{item.name}</h3>
+                                    </div>
+                                    <p className="flex-none text-base font-medium text-brown">
+                                        £{item.price}
+                                    </p>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <dl className="mt-6 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <dt>Subtotal</dt>
+                                <dd>£{cart.total}</dd>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <dt>Shipping</dt>
+                                <dd>£{Billings.Shipping}</dd>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <dt>VAT (20%)</dt>
+                                <dd>
+                                    £{(cart.total * Billings.VAT).toFixed(2)}
+                                </dd>
+                            </div>
+
+                            <div className="flex items-center justify-between border-t border-brown/20 pt-6">
+                                <dt className="text-base text-brown">Total</dt>
+                                <dd className="text-base font-bold text-brown">
+                                    £
+                                    {(
+                                        cart.total +
+                                        Billings.Shipping +
+                                        cart.total * Billings.VAT
+                                    ).toFixed(2)}
+                                </dd>
+                            </div>
+                        </dl>
+
+                        <Popover className="fixed inset-x-0 bottom-0 flex flex-col-reverse text-sm font-medium text-brown lg:hidden">
+                            <div className="relative z-10 border-t border-brown/20 bg-cream px-4 sm:px-6">
+                                <div className="mx-auto max-w-lg">
+                                    <PopoverButton className="flex w-full items-center py-6 font-medium">
+                                        <span className="mr-auto text-base">
+                                            Total
+                                        </span>
+                                        <span className="mr-2 text-base">
+                                            £{totalAmount}
+                                        </span>
+                                        <ChevronUpIcon
+                                            aria-hidden="true"
+                                            className="size-5 text-brown"
+                                        />
+                                    </PopoverButton>
+                                </div>
+                            </div>
+
+                            <PopoverBackdrop
+                                transition
+                                className="fixed inset-0 bg-black/25 transition-opacity duration-300 ease-linear data-[closed]:opacity-0"
+                            />
+
+                            <PopoverPanel
+                                transition
+                                className="relative transform bg-cream px-4 py-6 transition duration-300 ease-in-out data-[closed]:translate-y-full sm:px-6"
+                            >
+                                {/* Mobile summary details */}
+                            </PopoverPanel>
+                        </Popover>
+                    </div>
+                </section>
+
+                <div className="px-4 pt-16 pb-36 sm:px-6 lg:col-start-1 lg:row-start-1 lg:px-0 lg:pb-16">
+                    <div className="mx-auto max-w-lg lg:max-w-none">
+                        <section aria-labelledby="contact-info-heading">
                             <h2
-                                id="summary-heading"
+                                id="contact-info-heading"
                                 className="text-lg font-medium text-brown"
                             >
-                                Order summary
+                                Checkout
                             </h2>
+                        </section>
 
-                            <ul
-                                role="list"
-                                className="divide-y divide-brown/20 text-sm font-medium text-green"
-                            >
-                                {cartItems.map((item) => (
-                                    <li
-                                        key={item.id}
-                                        className="flex items-start space-x-4 py-6"
-                                    >
-                                        <img
-                                            alt={item.image.imageAlt}
-                                            src={item.image.imageSrc}
-                                            className="size-20 flex-none rounded-md object-cover"
-                                        />
-                                        <div className="flex-auto space-y-1">
-                                            <h3>{item.name}</h3>
-                                        </div>
-                                        <p className="flex-none text-base font-medium text-brown">
-                                            £{item.price}
-                                        </p>
-                                    </li>
-                                ))}
-                            </ul>
+                        {error && (
+                            <div className="mt-4 rounded-md bg-red-50 p-4 text-sm text-red-700">
+                                {error}
+                            </div>
+                        )}
 
-                            <dl className="mt-6 space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <dt>Subtotal</dt>
-                                    <dd>£{cart.total}</dd>
-                                </div>
-
-                                <div className="flex items-center justify-between">
-                                    <dt>Shipping</dt>
-                                    <dd>£{Billings.Shipping}</dd>
-                                </div>
-
-                                <div className="flex items-center justify-between">
-                                    <dt>VAT (20%)</dt>
-                                    <dd>
-                                        £
-                                        {(cart.total * Billings.VAT).toFixed(2)}
-                                    </dd>
-                                </div>
-
-                                <div className="flex items-center justify-between border-t border-brown/20 pt-6">
-                                    <dt className="text-base text-brown">
-                                        Total
-                                    </dt>
-                                    <dd className="text-base font-bold text-brown">
-                                        £
-                                        {(
-                                            cart.total +
-                                            Billings.Shipping +
-                                            cart.total * Billings.VAT
-                                        ).toFixed(2)}
-                                    </dd>
-                                </div>
-                            </dl>
-
-                            <Popover className="fixed inset-x-0 bottom-0 flex flex-col-reverse text-sm font-medium text-brown lg:hidden">
-                                <div className="relative z-10 border-t border-brown/20 bg-cream px-4 sm:px-6">
-                                    <div className="mx-auto max-w-lg">
-                                        <PopoverButton className="flex w-full items-center py-6 font-medium">
-                                            <span className="mr-auto text-base">
-                                                Total
-                                            </span>
-                                            <span className="mr-2 text-base">
-                                                £{totalAmount}
-                                            </span>
-                                            <ChevronUpIcon
-                                                aria-hidden="true"
-                                                className="size-5 text-brown"
-                                            />
-                                        </PopoverButton>
-                                    </div>
-                                </div>
-
-                                <PopoverBackdrop
-                                    transition
-                                    className="fixed inset-0 bg-black/25 transition-opacity duration-300 ease-linear data-[closed]:opacity-0"
-                                />
-
-                                <PopoverPanel
-                                    transition
-                                    className="relative transform bg-cream px-4 py-6 transition duration-300 ease-in-out data-[closed]:translate-y-full sm:px-6"
+                        {!stripePromise && (
+                            <div className="mt-6 text-center">
+                                <div
+                                    className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent text-brown align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                                    role="status"
                                 >
-                                    {/* Mobile summary details */}
-                                </PopoverPanel>
-                            </Popover>
-                        </div>
-                    </section>
-
-                    <div className="px-4 pt-16 pb-36 sm:px-6 lg:col-start-1 lg:row-start-1 lg:px-0 lg:pb-16">
-                        <div className="mx-auto max-w-lg lg:max-w-none">
-                            <section aria-labelledby="contact-info-heading">
-                                <h2
-                                    id="contact-info-heading"
-                                    className="text-lg font-medium text-brown"
-                                >
-                                    Checkout
-                                </h2>
-                            </section>
-
-                            {error && (
-                                <div className="mt-4 rounded-md bg-red-50 p-4 text-sm text-red-700">
-                                    {error}
+                                    <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+                                        Loading...
+                                    </span>
                                 </div>
-                            )}
+                                <p className="mt-2 text-sm text-brown">
+                                    Initializing payment system...
+                                </p>
+                            </div>
+                        )}
 
-                            {!stripePromise && (
+                        {stripePromise &&
+                            !clientSecret &&
+                            cartItems.length > 0 && (
                                 <div className="mt-6 text-center">
-                                    <div
-                                        className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent text-brown align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-                                        role="status"
-                                    >
-                                        <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-                                            Loading...
-                                        </span>
-                                    </div>
-                                    <p className="mt-2 text-sm text-brown">
-                                        Initializing payment system...
+                                    <p className="text-sm text-brown">
+                                        Please refresh the page to initialize
+                                        the payment system.
                                     </p>
                                 </div>
                             )}
 
-                            {stripePromise &&
-                                !clientSecret &&
-                                cartItems.length > 0 && (
-                                    <div className="mt-6 text-center">
-                                        <p className="text-sm text-brown">
-                                            Please refresh the page to
-                                            initialize the payment system.
-                                        </p>
-                                    </div>
-                                )}
+                        {stripePromise && clientSecret && (
+                            <div className="mt-6">
+                                <Elements
+                                    stripe={stripePromise}
+                                    options={options}
+                                >
+                                    <CheckoutForm />
+                                </Elements>
+                            </div>
+                        )}
 
-                            {stripePromise && clientSecret && (
-                                <div className="mt-6">
-                                    <Elements
-                                        stripe={stripePromise}
-                                        options={options}
-                                    >
-                                        <CheckoutForm />
-                                    </Elements>
-                                </div>
-                            )}
-
-                            {cartItems.length === 0 && (
-                                <div className="mt-6 rounded-md bg-yellow-50 p-4 text-sm text-yellow-700">
-                                    Your cart is empty. Add some products before
-                                    checking out.
-                                </div>
-                            )}
-                        </div>
+                        {cartItems.length === 0 && (
+                            <div className="mt-6 rounded-md bg-yellow-50 p-4 text-sm text-yellow-700">
+                                Your cart is empty. Add some products before
+                                checking out.
+                            </div>
+                        )}
                     </div>
-                </main>
-            </div>
-        </ShopLayout>
+                </div>
+            </main>
+        </div>
     );
 }
 
@@ -258,6 +255,7 @@ function CheckoutForm() {
     const [message, setMessage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isProcessingOrder, setIsProcessingOrder] = useState(false);
+    const [email, setEmail] = useState<string | null>(null);
 
     useEffect(() => {
         if (!stripe) {
@@ -280,13 +278,37 @@ function CheckoutForm() {
                     switch (paymentIntent.status) {
                         case "succeeded":
                             setMessage("Payment succeeded!");
+                            console.log("Payment succeeded!");
+                            const shippingDetails = paymentIntent.shipping;
                             // Clear cart locally BEFORE processing
                             cartStorage.clearCart();
+                            console.log("Cart cleared!");
                             setIsProcessingOrder(true);
-                            // Process the successful payment on the server
+                            console.log("Order processing started!");
+                            console.log(shippingDetails);
+                            console.log(paymentIntent);
+                            console.log(email);
+                            // Process the successful payment on the server with all required details
                             router.post("/checkout/process-payment", {
                                 payment_intent_id: paymentIntent.id,
+                                shipping: {
+                                    name: shippingDetails?.name,
+                                    address: {
+                                        line1: shippingDetails?.address?.line1,
+                                        line2: shippingDetails?.address?.line2,
+                                        city: shippingDetails?.address?.city,
+                                        postal_code:
+                                            shippingDetails?.address
+                                                ?.postal_code,
+                                        country:
+                                            shippingDetails?.address?.country,
+                                    },
+                                    phone: shippingDetails?.phone,
+                                },
+                                email: "maybol283@gmail.com",
+                                total_amount: paymentIntent.amount,
                             });
+
                             break;
                         case "processing":
                             setMessage("Your payment is processing.");

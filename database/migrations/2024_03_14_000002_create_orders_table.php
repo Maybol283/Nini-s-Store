@@ -15,7 +15,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'processing', 'shipped', 'delivered', 'cancelled'])->default('pending');
             $table->string('shipping_name');
             $table->string('shipping_email');
-            $table->string('shipping_phone');
+            $table->string('shipping_phone')->nullable();
             $table->string('shipping_address_line1');
             $table->string('shipping_address_line2')->nullable();
             $table->string('shipping_city');
