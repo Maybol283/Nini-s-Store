@@ -1,6 +1,5 @@
 import MainLayout from "@/Layouts/MainLayout";
 import Home from "./Home/Home";
-import About from "./Home/About";
 import Gallery from "./Home/Gallery";
 import Contact from "./Home/Contact";
 
@@ -10,11 +9,6 @@ const Dashboard = ({ message }: { message: string }) => {
             {/* Render Home Component */}
             <section className="flex-shrink-0 w-screen snap-center">
                 <Home message={message} />
-            </section>
-
-            {/* Render About Component */}
-            <section className="flex-shrink-0 w-screen snap-center">
-                <About />
             </section>
 
             {/* Render Home Component */}

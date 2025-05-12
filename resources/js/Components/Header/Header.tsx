@@ -48,6 +48,35 @@ interface SharedPageProps {
     auth: Auth;
 }
 
+const Links = [
+    {
+        href: "/",
+        text: "Home",
+    },
+    {
+        href: "/about",
+        text: "About",
+    },
+    {
+        href: "/shop",
+        text: "Shop",
+        dropdown: [
+            {
+                href: "/shop/adults",
+                text: "Adults",
+            },
+            {
+                href: "/shop/babies",
+                text: "Babies",
+            },
+        ],
+    },
+    {
+        href: "/size-guide",
+        text: "Size Guide",
+    },
+];
+
 type PageProps = InertiaPageProps & SharedPageProps;
 
 const Header = () => {
@@ -155,85 +184,70 @@ const Header = () => {
                 {/* Desktop navigation - change md to lg */}
                 <nav className="hidden lg:flex items-center">
                     <ul className="flex items-center space-x-6 font-modak">
-                        <li>
-                            <Link
-                                href="/"
-                                className="hover:text-pink-400 text-outline-green"
-                                onMouseEnter={() => setActiveDropdown(0)}
-                            >
-                                Home
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                href="/about"
-                                className="hover:text-pink-400 text-outline-green"
-                                onMouseEnter={() => setActiveDropdown(0)}
-                            >
-                                About
-                            </Link>
-                        </li>
-                        <li>
-                            <div className="relative inline-block text-left">
-                                <div>
-                                    <button
-                                        // When hovering over "Shop", set the active dropdown to 1.
-                                        onMouseEnter={() =>
-                                            setActiveDropdown(1)
-                                        }
-                                        className="inline-flex justify-center w-full font-medium text-outline-green hover:text-pink-400"
-                                    >
-                                        <Link
-                                            className="text-outline-green hover:text-pink-400"
-                                            href="/shop"
-                                        >
-                                            Shop
-                                        </Link>
-                                    </button>
-                                </div>
-                                {showDropdown && (
-                                    <div
-                                        // The transition uses Tailwind's transition classes.
-                                        // When activeDropdown is 1, the menu is visible (opacity-100);
-                                        // when it's 0, it fades out to opacity-0 before being removed.
-                                        className={`absolute right-0 z-10 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 transition-opacity duration-300 ${
-                                            activeDropdown === 1
-                                                ? "opacity-100"
-                                                : "opacity-0"
-                                        }`}
-                                    >
-                                        <div
-                                            className="py-1 text-outline-transparent text-center font-sans"
-                                            role="menu"
-                                            aria-orientation="vertical"
-                                            aria-labelledby="options-menu"
-                                        >
-                                            <Link
-                                                href="/shop/adults"
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                                role="menuitem"
+                        {Links.map((link, index) => (
+                            <li key={index}>
+                                {link.dropdown ? (
+                                    <div className="relative inline-block text-left">
+                                        <div>
+                                            <button
+                                                onMouseEnter={() =>
+                                                    setActiveDropdown(1)
+                                                }
+                                                className="inline-flex justify-center w-full font-medium text-outline-green hover:text-pink-400"
                                             >
-                                                Adults
-                                            </Link>
-                                            <Link
-                                                href="/shop/babies"
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                                role="menuitem"
-                                            >
-                                                Babies
-                                            </Link>
-                                            <Link
-                                                href="/size-guide"
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                                role="menuitem"
-                                            >
-                                                Size Guide
-                                            </Link>
+                                                <Link
+                                                    className="text-outline-green hover:text-pink-400"
+                                                    href={link.href}
+                                                >
+                                                    {link.text}
+                                                </Link>
+                                            </button>
                                         </div>
+                                        {showDropdown && (
+                                            <div
+                                                className={`absolute right-0 z-10 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 transition-opacity duration-300 ${
+                                                    activeDropdown === 1
+                                                        ? "opacity-100"
+                                                        : "opacity-0"
+                                                }`}
+                                            >
+                                                <div
+                                                    className="py-1 text-outline-transparent text-center font-sans"
+                                                    role="menu"
+                                                    aria-orientation="vertical"
+                                                    aria-labelledby="options-menu"
+                                                >
+                                                    {link.dropdown.map(
+                                                        (subLink, subIndex) => (
+                                                            <Link
+                                                                key={subIndex}
+                                                                href={
+                                                                    subLink.href
+                                                                }
+                                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                                role="menuitem"
+                                                            >
+                                                                {subLink.text}
+                                                            </Link>
+                                                        )
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
+                                ) : (
+                                    <Link
+                                        href={link.href}
+                                        className="hover:text-pink-400 text-outline-green"
+                                        onMouseEnter={() =>
+                                            setActiveDropdown(0)
+                                        }
+                                    >
+                                        {link.text}
+                                    </Link>
                                 )}
-                            </div>
-                        </li>
+                            </li>
+                        ))}
                         {/* Auth links */}
                         {user ? (
                             <li className="relative">
@@ -342,9 +356,12 @@ const Header = () => {
                 onClose={setMobileMenuOpen}
                 className="relative z-40 lg:hidden"
             >
-                <div className="fixed inset-0 bg-black/25" aria-hidden="true" />
+                <div
+                    className="fixed inset-0 bg-black/25 text-outline-green"
+                    aria-hidden="true"
+                />
 
-                <div className="fixed inset-0 z-40 flex">
+                <div className="fixed inset-0 z-40 flex text-outline-green">
                     <DialogPanel className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-brown px-6 py-8 shadow-xl">
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-bold text-cream">
@@ -365,50 +382,39 @@ const Header = () => {
 
                         <div className="mt-6 border-t border-pink pt-6">
                             <nav className="grid gap-y-6">
-                                <Link
-                                    href="/"
-                                    className="text-cream hover:text-pink-400 text-lg font-modak"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                >
-                                    Home
-                                </Link>
-                                <Link
-                                    href="/about"
-                                    className="text-cream hover:text-pink-400 text-lg font-modak"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                >
-                                    About
-                                </Link>
-                                <Link
-                                    href="/shop"
-                                    className="text-cream hover:text-pink-400 text-lg font-modak"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                >
-                                    Shop
-                                </Link>
-                                <div className="grid grid-cols-1 gap-y-4 pl-6">
-                                    <Link
-                                        href="/shop/adults"
-                                        className="text-cream hover:text-pink-400 text-base font-modak"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                    >
-                                        Adults
-                                    </Link>
-                                    <Link
-                                        href="/shop/babies"
-                                        className="text-cream hover:text-pink-400 text-base font-modak"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                    >
-                                        Babies
-                                    </Link>
-                                    <Link
-                                        href="/size-guide"
-                                        className="text-cream hover:text-pink-400 text-base font-modak"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                    >
-                                        Size Guide
-                                    </Link>
-                                </div>
+                                {Links.map((link, index) => (
+                                    <React.Fragment key={index}>
+                                        <Link
+                                            href={link.href}
+                                            className="text-cream hover:text-pink-400 text-lg font-modak"
+                                            onClick={() =>
+                                                setMobileMenuOpen(false)
+                                            }
+                                        >
+                                            {link.text}
+                                        </Link>
+                                        {link.dropdown && (
+                                            <div className="grid grid-cols-1 gap-y-4 pl-6">
+                                                {link.dropdown.map(
+                                                    (subLink, subIndex) => (
+                                                        <Link
+                                                            key={subIndex}
+                                                            href={subLink.href}
+                                                            className="text-cream hover:text-pink-400 text-base font-modak"
+                                                            onClick={() =>
+                                                                setMobileMenuOpen(
+                                                                    false
+                                                                )
+                                                            }
+                                                        >
+                                                            {subLink.text}
+                                                        </Link>
+                                                    )
+                                                )}
+                                            </div>
+                                        )}
+                                    </React.Fragment>
+                                ))}
 
                                 {/* Auth links */}
                                 {user ? (

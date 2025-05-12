@@ -305,7 +305,7 @@ function CheckoutForm() {
                                     },
                                     phone: shippingDetails?.phone,
                                 },
-                                email: "maybol283@gmail.com",
+                                email: "nigorabay1998@gmail.com",
                                 total_amount: paymentIntent.amount,
                             });
 

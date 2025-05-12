@@ -1,3 +1,4 @@
+import ShopLayout from "@/Layouts/ShopLayout";
 import { animated, useTrail, useInView } from "@react-spring/web";
 
 export default function About() {
@@ -22,23 +23,25 @@ export default function About() {
     });
 
     return (
-        <div className="flex items-center justify-center h-screen w-screen bg-cream  font-thin">
-            <p className="text-7xl w-[30%]" ref={ref}>
-                {about_text_array.map((text, index) => (
-                    <animated.span
-                        key={index}
-                        style={trail[index]}
-                        className="inline-block mr-[0.3em]"
-                    >
-                        {text}
-                    </animated.span>
-                ))}
-            </p>
+        <ShopLayout>
+            <div className="flex items-center justify-center h-[90vh] w-screen bg-cream text-green">
+                <p className="text-6xl w-[30%]" ref={ref}>
+                    {about_text_array.map((text, index) => (
+                        <animated.span
+                            key={index}
+                            style={trail[index]}
+                            className="inline-block mr-[0.3em]"
+                        >
+                            {text}
+                        </animated.span>
+                    ))}
+                </p>
 
-            <img
-                src="storage/gallery_images/IMG-20250124-WA0001.jpg"
-                className="size-[30%] object-contain"
-            ></img>
-        </div>
+                <img
+                    src="storage/gallery_images/IMG-20250124-WA0001.jpg"
+                    className="size-[30%] object-contain"
+                ></img>
+            </div>
+        </ShopLayout>
     );
 }

@@ -60,7 +60,7 @@ class OrderCompleted extends Mailable
                         'price' => $item->price,
                     ];
                 }),
-                'totalAmount' => $this->order->total_amount,
+                'totalAmount' => $this->order->total_amount / 100,
             ],
         );
     }
