@@ -191,8 +191,9 @@ class ShopController extends Controller
                 'description' => $product->description,
                 'category' => $product->category,
                 'images' => $product->images,
-                'sizes' => $product->sizes,
+                'size' => $product->size,
                 'in_stock' => $product->in_stock,
+                'age_group' => $product->age_group,
             ]
         ]);
     }

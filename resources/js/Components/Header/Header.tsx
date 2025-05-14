@@ -54,10 +54,6 @@ const Links = [
         text: "Home",
     },
     {
-        href: "/about",
-        text: "About",
-    },
-    {
         href: "/shop",
         text: "Shop",
         dropdown: [
@@ -90,8 +86,6 @@ const Header = () => {
         ? Object.values(cart.items || {})
         : [];
 
-    // When activeDropdown is 0, no dropdown is open.
-    // Setting it to 1 will open the shop dropdown.
     const [activeDropdown, setActiveDropdown] = useState<number>(0);
     // Controls whether the dropdown element should be rendered.
     const [showDropdown, setShowDropdown] = useState(false);
@@ -117,8 +111,13 @@ const Header = () => {
             Object.keys(cartItemsObj).length === 0
         ) {
             // If we have items in localStorage but not on server, sync to server
+            const itemsToSync = Object.values(localCart.items).map((item) => ({
+                product_id: item.product_id,
+                quantity: item.quantity,
+            }));
+
             router.post("/cart/sync", {
-                items: JSON.stringify(localCart.items),
+                items: itemsToSync,
                 total: localCart.total,
                 itemCount: localCart.itemCount,
             });
@@ -144,7 +143,7 @@ const Header = () => {
             onMouseLeave={() => setActiveDropdown(0)}
             className="text-cream py-4 px-6 border-b-8 border-pink bg-brown"
         >
-            <div className="mx-auto flex justify-between items-center text-outline-green">
+            <div className="mx-auto flex justify-between items-center font-green">
                 <h1 className="text-2xl font-bold">Crocheted With Love</h1>
 
                 {/* Mobile menu button - change md to lg */}
@@ -183,7 +182,7 @@ const Header = () => {
 
                 {/* Desktop navigation - change md to lg */}
                 <nav className="hidden lg:flex items-center">
-                    <ul className="flex items-center space-x-6 font-modak">
+                    <ul className="flex items-center space-x-6">
                         {Links.map((link, index) => (
                             <li key={index}>
                                 {link.dropdown ? (
@@ -193,10 +192,10 @@ const Header = () => {
                                                 onMouseEnter={() =>
                                                     setActiveDropdown(1)
                                                 }
-                                                className="inline-flex justify-center w-full font-medium text-outline-green hover:text-pink-400"
+                                                className="inline-flex justify-center w-full font-medium font-green hover:text-pink-400"
                                             >
                                                 <Link
-                                                    className="text-outline-green hover:text-pink-400"
+                                                    className="font-green hover:text-pink-400"
                                                     href={link.href}
                                                 >
                                                     {link.text}
@@ -238,7 +237,7 @@ const Header = () => {
                                 ) : (
                                     <Link
                                         href={link.href}
-                                        className="hover:text-pink-400 text-outline-green"
+                                        className="hover:text-pink-400 font-green"
                                         onMouseEnter={() =>
                                             setActiveDropdown(0)
                                         }
@@ -256,7 +255,7 @@ const Header = () => {
                                     className="relative inline-block text-left"
                                 >
                                     <div>
-                                        <MenuButton className="inline-flex justify-center w-full hover:text-pink-400 text-outline-green font-medium">
+                                        <MenuButton className="inline-flex justify-center w-full hover:text-pink-400 font-green font-medium">
                                             {user.name}
                                         </MenuButton>
                                     </div>
@@ -307,7 +306,7 @@ const Header = () => {
                                 <li>
                                     <Link
                                         href="/login"
-                                        className="hover:text-pink-400 text-outline-green"
+                                        className="hover:text-pink-400 font-green"
                                     >
                                         Login
                                     </Link>
@@ -315,7 +314,7 @@ const Header = () => {
                                 <li>
                                     <Link
                                         href="/register"
-                                        className="hover:text-pink-400 text-outline-green"
+                                        className="hover:text-pink-400 font-green"
                                     >
                                         Register
                                     </Link>
@@ -357,11 +356,11 @@ const Header = () => {
                 className="relative z-40 lg:hidden"
             >
                 <div
-                    className="fixed inset-0 bg-black/25 text-outline-green"
+                    className="fixed inset-0 bg-black/25 font-green"
                     aria-hidden="true"
                 />
 
-                <div className="fixed inset-0 z-40 flex text-outline-green">
+                <div className="fixed inset-0 z-40 flex font-green">
                     <DialogPanel className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-brown px-6 py-8 shadow-xl">
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-bold text-cream">
@@ -386,7 +385,7 @@ const Header = () => {
                                     <React.Fragment key={index}>
                                         <Link
                                             href={link.href}
-                                            className="text-cream hover:text-pink-400 text-lg font-modak"
+                                            className="text-cream hover:text-pink-400 text-lg"
                                             onClick={() =>
                                                 setMobileMenuOpen(false)
                                             }
@@ -400,7 +399,7 @@ const Header = () => {
                                                         <Link
                                                             key={subIndex}
                                                             href={subLink.href}
-                                                            className="text-cream hover:text-pink-400 text-base font-modak"
+                                                            className="text-cream hover:text-pink-400 text-base"
                                                             onClick={() =>
                                                                 setMobileMenuOpen(
                                                                     false
@@ -421,7 +420,7 @@ const Header = () => {
                                     <>
                                         <Link
                                             href="/dashboard"
-                                            className="text-cream hover:text-pink-400 text-lg font-modak"
+                                            className="text-cream hover:text-pink-400 text-lg"
                                             onClick={() =>
                                                 setMobileMenuOpen(false)
                                             }
@@ -433,7 +432,7 @@ const Header = () => {
                                                 handleLogout();
                                                 setMobileMenuOpen(false);
                                             }}
-                                            className="text-cream hover:text-pink-400 text-lg font-modak text-left"
+                                            className="text-cream hover:text-pink-400 text-lg text-left"
                                         >
                                             Log out
                                         </button>
@@ -442,7 +441,7 @@ const Header = () => {
                                     <>
                                         <Link
                                             href="/login"
-                                            className="text-cream hover:text-pink-400 text-lg font-modak"
+                                            className="text-cream hover:text-pink-400 text-lg"
                                             onClick={() =>
                                                 setMobileMenuOpen(false)
                                             }
@@ -451,7 +450,7 @@ const Header = () => {
                                         </Link>
                                         <Link
                                             href="/register"
-                                            className="text-cream hover:text-pink-400 text-lg font-modak"
+                                            className="text-cream hover:text-pink-400 text-lg"
                                             onClick={() =>
                                                 setMobileMenuOpen(false)
                                             }
@@ -463,7 +462,7 @@ const Header = () => {
 
                                 <Link
                                     href="/cart"
-                                    className="text-cream hover:text-pink-400 text-lg font-modak"
+                                    className="text-cream hover:text-pink-400 text-lg"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
                                     Cart ({cart.itemCount || 0})

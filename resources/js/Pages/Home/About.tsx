@@ -23,25 +23,26 @@ export default function About() {
     });
 
     return (
-        <ShopLayout>
-            <div className="flex items-center justify-center h-[90vh] w-screen bg-cream text-green">
-                <p className="text-6xl w-[30%]" ref={ref}>
-                    {about_text_array.map((text, index) => (
-                        <animated.span
-                            key={index}
-                            style={trail[index]}
-                            className="inline-block mr-[0.3em]"
-                        >
-                            {text}
-                        </animated.span>
-                    ))}
-                </p>
-
-                <img
-                    src="storage/gallery_images/IMG-20250124-WA0001.jpg"
-                    className="size-[30%] object-contain"
-                ></img>
-            </div>
-        </ShopLayout>
+        <div className="font-dynapuff grid grid-rows-2 md:flex items-center justify-center h-[90vh] w-screen bg-cream text-green -space-y-48 sm:space-y-0">
+            <img
+                src="/storage/Nini-Images/Nini-Final.webp"
+                alt="blob"
+                className="z-index-10 size-[clamp(300px,50vw,1000px)] justify-self-center"
+            />
+            <p
+                className="text-center text-[clamp(2.5rem,4vw,3.75rem)] w-[90%] sm:w-[80%] md:w-[30%] justify-self-center "
+                ref={ref}
+            >
+                {about_text_array.map((text, index) => (
+                    <animated.span
+                        key={index}
+                        style={trail[index]}
+                        className="inline-block mr-[0.3em]"
+                    >
+                        {text}
+                    </animated.span>
+                ))}
+            </p>
+        </div>
     );
 }

@@ -100,7 +100,7 @@ export default function Gallery() {
 
                 <div className="mt-10 text-center">
                     <Link
-                        href="/"
+                        href="/gallery"
                         className="inline-block bg-cream text-green border border-green px-6 py-3 rounded-md hover:bg-green hover:text-cream transition-colors duration-300 font-medium"
                     >
                         View All Images

@@ -1,10 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Modak&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DynaPuff:wght@400..700&family=Modak&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-    font-family: "Modak", serif;
+    font-family: "Dynapuff", serif;
     font-style: bold;
 }
 

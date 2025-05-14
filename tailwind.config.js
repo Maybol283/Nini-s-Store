@@ -24,6 +24,7 @@ export default {
             fontFamily: {
                 sans: ["Figtree", ...defaultTheme.fontFamily.sans],
                 modak: ["Modak", "cursive"],
+                dynapuff: ["DynaPuff", "cursive"],
             },
             strokeWidth: {
                 sm: "1px",

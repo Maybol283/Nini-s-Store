@@ -30,35 +30,39 @@ export default function ShopLandingPage({
 
     return (
         <ShopLayout>
-            <div className="p-8 font-sans">
+            <div className="p-8 ">
                 {/* Hero Section */}
                 <div className="text-center mb-12">
-                    <h1 className="text-5xl font-modak mb-4 text-green text-outline-white">
+                    <h1 className="text-5xl mb-4 text-green">
                         Welcome to My Unique Crocheted Shop
                     </h1>
-                    <p className="text-lg">
+                    <p className="text-lg text-lightGray">
                         Discover my exclusive, handmade crochet collection.
                     </p>
                 </div>
 
                 {/* Handcrafted Collection Categories */}
                 <section className="mb-12">
-                    <h2 className="text-3xl font-semibold mb-4">
+                    <h2 className="text-3xl font-semibold mb-4 text-charcoal">
                         Handcrafted Collection
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Link href="/shop/adults">
-                            <div className="p-4 bg-beige rounded-md text-center hover:bg-green hover:text-cream transition-colors duration-300">
-                                <h3 className="text-2xl font-bold">Adults</h3>
-                                <p className="mt-2 text-sm">
+                            <div className="group p-4 bg-beige rounded-md text-center hover:bg-green transition-colors duration-300">
+                                <h3 className="text-2xl font-bold text-charcoal group-hover:text-cream transition-colors duration-300">
+                                    Adults
+                                </h3>
+                                <p className="mt-2 text-sm text-lightGray group-hover:text-cream transition-colors duration-300">
                                     Each piece is uniquely crocheted with love.
                                 </p>
                             </div>
                         </Link>
                         <Link href="/shop/babies">
-                            <div className="p-4 bg-beige rounded-md text-center hover:bg-green hover:text-cream transition-colors duration-300">
-                                <h3 className="text-2xl font-bold">Babies</h3>
-                                <p className="mt-2 text-sm">
+                            <div className="group p-4 bg-beige rounded-md text-center hover:bg-green transition-colors duration-300">
+                                <h3 className="text-2xl font-bold text-charcoal group-hover:text-cream transition-colors duration-300">
+                                    Babies
+                                </h3>
+                                <p className="mt-2 text-sm text-lightGray group-hover:text-cream transition-colors duration-300">
                                     Soft, cozy crocheted items for your little
                                     ones.
                                 </p>
@@ -69,7 +73,7 @@ export default function ShopLandingPage({
 
                 {/* New Arrivals */}
                 <section className="mb-12">
-                    <h2 className="text-3xl font-semibold mb-4">
+                    <h2 className="text-3xl font-semibold mb-4 text-charcoal">
                         New Arrivals
                     </h2>
                     {featuredProducts.length === 0 ? (
@@ -105,7 +109,7 @@ export default function ShopLandingPage({
 
                 {/* Why Choose Us */}
                 <section className="mb-12 bg-beige rounded-lg p-8">
-                    <h2 className="text-3xl font-semibold mb-6 text-center">
+                    <h2 className="text-3xl font-semibold mb-6 text-center text-charcoal">
                         Why Choose Our Crocheted Items?
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -125,10 +129,10 @@ export default function ShopLandingPage({
                                     />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-semibold mb-2">
+                            <h3 className="text-xl font-semibold mb-2 text-charcoal">
                                 Made with Love
                             </h3>
-                            <p>
+                            <p className="text-lightGray">
                                 Each item is carefully crocheted by hand with
                                 attention to detail and love.
                             </p>
@@ -149,10 +153,10 @@ export default function ShopLandingPage({
                                     />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-semibold mb-2">
+                            <h3 className="text-xl font-semibold mb-2 text-charcoal">
                                 Quality Materials
                             </h3>
-                            <p>
+                            <p className="text-lightGray">
                                 We use only the finest yarns and materials for
                                 lasting comfort.
                             </p>
@@ -173,49 +177,20 @@ export default function ShopLandingPage({
                                     />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-semibold mb-2">
+                            <h3 className="text-xl font-semibold mb-2 text-charcoal">
                                 Unique Designs
                             </h3>
-                            <p>
+                            <p className="text-lightGray">
                                 Every piece is unique and tells its own story.
                             </p>
                         </div>
                     </div>
                 </section>
 
-                {/* Popular Categories */}
-                {categories.length > 0 && (
-                    <section className="mb-12">
-                        <h2 className="text-3xl font-semibold mb-4">
-                            Popular Categories
-                        </h2>
-                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                            {categories.map((category, index) => (
-                                <Link
-                                    key={category}
-                                    href={`/shop/search?category=${category}`}
-                                    className={`bg-cream p-4 rounded-md text-center hover:bg-green hover:text-cream transition-colors duration-300 ${
-                                        isVisible
-                                            ? afterAnimation
-                                            : beforeAnimation
-                                    }`}
-                                    style={{
-                                        transitionDelay: `${index * 100}ms`,
-                                    }}
-                                >
-                                    <span className="text-lg font-medium capitalize">
-                                        {category}
-                                    </span>
-                                </Link>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
                 {/* Trending Now */}
                 {featuredProducts.length > 4 && (
                     <section className="mb-12">
-                        <h2 className="text-3xl font-semibold mb-4">
+                        <h2 className="text-3xl font-semibold mb-4 text-charcoal">
                             Trending Now
                         </h2>
                         <div className="md:flex md:flex-grow md:flex-wrap grid-cols-1 gap-6">
@@ -248,7 +223,7 @@ export default function ShopLandingPage({
 
                 {/* Customer Reviews */}
                 <section className="mb-12">
-                    <h2 className="text-3xl font-semibold mb-6 text-center">
+                    <h2 className="text-3xl font-semibold mb-6 text-center text-charcoal">
                         What Our Customers Say
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -290,7 +265,7 @@ export default function ShopLandingPage({
                                         </svg>
                                     ))}
                                 </div>
-                                <p className="text-gray-600 mb-4">
+                                <p className="text-lightGray mb-4">
                                     "{review.review}"
                                 </p>
                                 <p className="font-semibold">{review.name}</p>
@@ -301,10 +276,10 @@ export default function ShopLandingPage({
 
                 {/* Call to Action */}
                 <section className="mb-12 bg-green text-cream rounded-lg p-8 text-center">
-                    <h2 className="text-3xl font-semibold mb-4">
+                    <h2 className="text-3xl font-semibold mb-4 text-cream">
                         Ready to Find Your Perfect Crochet?
                     </h2>
-                    <p className="mb-6 max-w-2xl mx-auto">
+                    <p className="mb-6 max-w-2xl mx-auto text-cream">
                         Browse our collection to find unique, handcrafted items
                         that will become treasured pieces in your wardrobe.
                     </p>
