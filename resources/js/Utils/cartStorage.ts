@@ -1,21 +1,4 @@
-interface CartItem {
-    id: string;
-    product_id: number;
-    name: string;
-    price: number;
-    quantity: number;
-    image: {
-        imageSrc: string;
-        imageAlt: string;
-    };
-    category: string;
-}
-
-interface Cart {
-    items: { [key: string]: CartItem };
-    total: number;
-    itemCount: number;
-}
+import { CartItem, Cart } from "@/types";
 
 const CART_STORAGE_KEY = "shopping_cart";
 
@@ -105,8 +88,11 @@ export const cartStorage = {
     // Remove item from cart
     removeItem(itemId: string): Cart {
         const cart = this.getCart();
+        console.log(cart.items[itemId]);
+        console.log(cart.items);
         if (cart.items[itemId]) {
             delete cart.items[itemId];
+            console.log(cart);
             cart.itemCount = Object.values(cart.items).reduce(
                 (sum, item) => sum + item.quantity,
                 0

@@ -59,7 +59,7 @@ export interface CartItem {
 }
 
 export interface Cart {
-    items: CartItem[];
+    items: { [key: string]: CartItem };
     total: number;
     itemCount: number;
 }

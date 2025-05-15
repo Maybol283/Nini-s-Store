@@ -38,7 +38,12 @@ const CartPanel = ({ cartItems, position = "desktop" }: CartPanelProps) => {
     // Handle removing an item from the cart
     const handleRemoveItem = (itemId: string) => {
         // First update local storage to maintain UI consistency
-        cartStorage.removeItem(itemId);
+        try {
+            cartStorage.removeItem(itemId);
+            console.log("Item removed from local storage");
+        } catch (error) {
+            console.error("Failed to remove item from local storage:", error);
+        }
 
         // Then send delete request to server
         router.delete(`/cart/remove/${itemId}`, {

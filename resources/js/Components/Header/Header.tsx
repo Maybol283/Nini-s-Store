@@ -17,27 +17,7 @@ import {
 } from "@headlessui/react";
 import { cartStorage } from "@/Utils/cartStorage";
 import CartPanel from "./CartPanel";
-
-interface CartItem {
-    id: string;
-    product_id: number;
-    name: string;
-    price: number;
-    quantity: number;
-    image: {
-        imageSrc: string;
-        imageAlt: string;
-    };
-    category: string;
-}
-
-interface Auth {
-    user: {
-        id: number;
-        name: string;
-        email: string;
-    } | null;
-}
+import { CartItem, Auth } from "@/types";
 
 interface SharedPageProps {
     cart?: {
@@ -111,16 +91,17 @@ const Header = () => {
             Object.keys(cartItemsObj).length === 0
         ) {
             // If we have items in localStorage but not on server, sync to server
-            const itemsToSync = Object.values(localCart.items).map((item) => ({
-                product_id: item.product_id,
-                quantity: item.quantity,
-            }));
+            const itemsToSync = Object.values(localCart.items);
 
-            router.post("/cart/sync", {
-                items: itemsToSync,
-                total: localCart.total,
-                itemCount: localCart.itemCount,
-            });
+            try {
+                router.post("/cart/sync", {
+                    items: JSON.stringify(itemsToSync),
+                    total: localCart.total,
+                    itemCount: localCart.itemCount,
+                });
+            } catch (error) {
+                console.error("Error syncing cart:", error);
+            }
         }
     }, []);
 

@@ -47,8 +47,6 @@ export default function ShopItem({ product, relatedProducts }: Props) {
         });
     };
 
-    console.log(product);
-
     return (
         <ShopLayout>
             <Head title={product.name} />

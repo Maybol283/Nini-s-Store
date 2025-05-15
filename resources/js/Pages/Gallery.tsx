@@ -1,11 +1,6 @@
 import React from "react";
 import { Head } from "@inertiajs/react";
-import {
-    Dialog,
-    DialogPanel,
-    Transition,
-    TransitionChild,
-} from "@headlessui/react";
+import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useTrail, animated } from "@react-spring/web";
@@ -25,19 +20,27 @@ const Gallery = ({ images }: Props) => {
     const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(
         null
     );
-
+    const [isOpen, setIsOpen] = useState(false);
     const trail = useTrail(images.length, {
         from: { opacity: 0, y: 20 },
         to: { opacity: 1, y: 0 },
-        config: { mass: 1, tension: 280, friction: 20 },
         delay: 100,
     });
+
+    const openModal = (image: GalleryImage) => {
+        setSelectedImage(image);
+        setIsOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsOpen(false);
+    };
 
     return (
         <ShopLayout>
             <Head title="Gallery" />
 
-            <div className="flex-grow-0 min-h-screen pb-4 px-4 sm:px-6 lg:px-8">
+            <div className="min-h-screen pb-4 px-4 sm:px-6 lg:px-8 flex-none overflow-x-hidden">
                 <div className="max-w-7xl mx-auto">
                     <h1 className="text-4xl font-bold text-cream text-center mb-12">
                         Our Gallery
@@ -54,7 +57,7 @@ const Gallery = ({ images }: Props) => {
                                     ),
                                 }}
                                 className="relative aspect-square overflow-hidden rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                                onClick={() => setSelectedImage(images[index])}
+                                onClick={() => openModal(images[index])}
                             >
                                 <img
                                     src={images[index].src}
@@ -68,57 +71,46 @@ const Gallery = ({ images }: Props) => {
             </div>
 
             {/* Image Modal */}
-            <Transition appear show={!!selectedImage} as={Fragment}>
-                <Dialog
-                    as="div"
-                    className="relative z-50 hidden md:block"
-                    onClose={() => setSelectedImage(null)}
-                >
-                    <TransitionChild
-                        as={Fragment}
-                        enter="ease-out duration-300"
-                        enterFrom="opacity-0"
-                        enterTo="opacity-100"
-                        leave="ease-in duration-200"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
-                    >
-                        <div className="fixed inset-0 bg-black bg-opacity-75" />
-                    </TransitionChild>
 
-                    <div className="fixed inset-0 overflow-y-auto">
-                        <div className="flex min-h-full items-center justify-center p-4">
-                            <TransitionChild
-                                as={Fragment}
-                                enter="ease-out duration-300"
-                                enterFrom="opacity-0 scale-95"
-                                enterTo="opacity-100 scale-100"
-                                leave="ease-in duration-200"
-                                leaveFrom="opacity-100 scale-100"
-                                leaveTo="opacity-0 scale-95"
+            <Dialog
+                as="div"
+                className="relative z-50 hidden md:block"
+                onClose={closeModal}
+                open={isOpen}
+                transition
+            >
+                <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-75" />
+
+                <div className="fixed inset-0 overflow-y-auto">
+                    <div className="flex min-h-full items-center justify-center p-4">
+                        <DialogPanel
+                            transition
+                            className="
+                            transition duration-300 ease-out
+                            data-[closed]:opacity-0
+                            data-[closed]:data-[enter]:scale-95
+                            data-[closed]:data-[leave]:scale-95
+                            relative w-auto rounded-lg bg-pink p-8 shadow-xl"
+                        >
+                            <button
+                                type="button"
+                                className="absolute top-2 right-2 text-cream hover:text-green"
+                                onClick={closeModal}
                             >
-                                <DialogPanel className="relative w-auto max-w-[90vw] transform overflow-hidden rounded-lg bg-pink p-8 shadow-xl transition-all">
-                                    <button
-                                        type="button"
-                                        className="absolute top-2 right-2 text-cream hover:text-pink-400"
-                                        onClick={() => setSelectedImage(null)}
-                                    >
-                                        <XMarkIcon className="h-6 w-6" />
-                                    </button>
+                                <XMarkIcon className="h-6 w-6" />
+                            </button>
 
-                                    {selectedImage && (
-                                        <img
-                                            src={selectedImage.src}
-                                            alt={selectedImage.alt}
-                                            className="w-auto h-auto max-h-[80vh] max-w-[85vw] object-contain"
-                                        />
-                                    )}
-                                </DialogPanel>
-                            </TransitionChild>
-                        </div>
+                            {selectedImage && (
+                                <img
+                                    src={selectedImage.src}
+                                    alt={selectedImage.alt}
+                                    className="w-auto h-auto max-h-[80vh] max-w-[85vw] object-contain"
+                                />
+                            )}
+                        </DialogPanel>
                     </div>
-                </Dialog>
-            </Transition>
+                </div>
+            </Dialog>
         </ShopLayout>
     );
 };
