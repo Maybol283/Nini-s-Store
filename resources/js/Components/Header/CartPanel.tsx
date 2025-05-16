@@ -128,7 +128,7 @@ const CartPanel = ({ cartItems, position = "desktop" }: CartPanelProps) => {
                                                 <img
                                                     src={item.image.imageSrc}
                                                     alt={item.image.imageAlt}
-                                                    className="h-full w-full object-cover object-center"
+                                                    className="object-cover object-center"
                                                 />
                                             </div>
                                             <div className="ml-4 flex flex-1 flex-col">

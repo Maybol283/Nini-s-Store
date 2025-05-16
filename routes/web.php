@@ -79,6 +79,17 @@ Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
 // Contact routes
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
+// Order routes for authenticated users
+Route::middleware(['auth'])->group(function () {
+    Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{id}', [\App\Http\Controllers\OrderController::class, 'show'])->name('orders.show');
+
+    // Admin only routes - using class name directly instead of alias
+    Route::middleware([\App\Http\Middleware\AdminOnly::class])->group(function () {
+        Route::post('/orders/{id}/update-status', [\App\Http\Controllers\OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    });
+});
+
 // Admin routes - using direct class reference 
 Route::prefix('admin')
     ->name('admin.')

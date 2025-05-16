@@ -95,6 +95,14 @@ const Dashboard = ({ user }: Props) => {
                                             View Cart
                                         </Link>
                                     </li>
+                                    <li>
+                                        <Link
+                                            href="/orders"
+                                            className="text-brown hover:underline"
+                                        >
+                                            Your Orders
+                                        </Link>
+                                    </li>
                                     {isAdmin && (
                                         <>
                                             <li className="pt-4 border-t border-gray-200">
