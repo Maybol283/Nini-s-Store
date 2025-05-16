@@ -68,11 +68,16 @@ export const cartStorage = {
     // Add item to cart
     addItem(item: CartItem): Cart {
         const cart = this.getCart();
+        // Always set quantity to 1
+        item.quantity = 1;
+
         if (cart.items[item.id]) {
-            cart.items[item.id].quantity += item.quantity;
+            // If item exists, don't add it again
+            return cart;
         } else {
             cart.items[item.id] = item;
         }
+
         cart.itemCount = Object.values(cart.items).reduce(
             (sum, item) => sum + item.quantity,
             0
@@ -110,7 +115,8 @@ export const cartStorage = {
     updateItemQuantity(itemId: string, quantity: number): Cart {
         const cart = this.getCart();
         if (cart.items[itemId]) {
-            cart.items[itemId].quantity = quantity;
+            // Force quantity to be 1
+            cart.items[itemId].quantity = 1;
             cart.itemCount = Object.values(cart.items).reduce(
                 (sum, item) => sum + item.quantity,
                 0

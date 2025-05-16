@@ -150,12 +150,7 @@ const CartPanel = ({ cartItems, position = "desktop" }: CartPanelProps) => {
                                                     <p className="mt-1 text-sm text-gray-600">
                                                         {item.category}
                                                     </p>
-                                                </div>
-                                                <div className="flex flex-1 items-end justify-between text-sm">
-                                                    <p className="text-gray-600">
-                                                        Qty {item.quantity}
-                                                    </p>
-                                                    <div className="flex">
+                                                    <div className="flex justify-end mt-2">
                                                         <button
                                                             onClick={() =>
                                                                 handleRemoveItem(

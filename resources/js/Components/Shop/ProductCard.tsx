@@ -37,7 +37,7 @@ export default function ProductCard({
     // Create the card content
     const cardContent = (
         <>
-            <div className="aspect-square w-full overflow-hidden">
+            <div className="aspect-square h-full overflow-hidden rounded-t-lg">
                 <img
                     src={
                         product.images && product.images.length > 0
@@ -49,7 +49,7 @@ export default function ProductCard({
                             ? product.images[0].imageAlt
                             : product.name
                     }
-                    className="h-full w-full object-cover object-center transition-opacity group-hover:opacity-90 z-10"
+                    className="object-cover object-center transition-opacity group-hover:opacity-90 z-10"
                 />
             </div>
             <div className="p-4">
@@ -73,7 +73,7 @@ export default function ProductCard({
     return (
         <div style={style} className={className}>
             {onClick ? (
-                <button onClick={onClick} className="w-full text-left">
+                <button onClick={onClick} className="h-full w-full text-left">
                     {cardContent}
                 </button>
             ) : (

@@ -25,7 +25,8 @@ class CartService
         $cartItemId = $this->generateCartItemId($product->id);
 
         if (isset($cart['items'][$cartItemId])) {
-            $cart['items'][$cartItemId]['quantity'] += $quantity;
+            // Don't add more quantity if item already exists
+            return $cart;
         } else {
             // Get product image data from the JSON field
             $productImages = is_array($product->images) ? $product->images : json_decode($product->images, true);
@@ -45,7 +46,7 @@ class CartService
                 'product_id' => $product->id,
                 'name' => $product->name,
                 'price' => $product->price,
-                'quantity' => $quantity,
+                'quantity' => 1, // Always set to 1
                 'image' => [
                     'imageSrc' => $imageUrl,
                     'imageAlt' => $imageAlt,
@@ -90,7 +91,8 @@ class CartService
         $cart = $this->getCart();
 
         if (isset($cart['items'][$cartItemId])) {
-            $cart['items'][$cartItemId]['quantity'] = $quantity;
+            // Always set quantity to 1
+            $cart['items'][$cartItemId]['quantity'] = 1;
 
             // Update total and itemCount
             $cart['total'] = $this->calculateTotal($cart['items']);

@@ -39,11 +39,12 @@ class Cart extends Model
             ->first();
 
         if ($existingItem) {
-            $existingItem->increment('quantity', $quantity);
+            // Don't increment quantity, leave as is since item already exists
+            return;
         } else {
             $this->items()->create([
                 'product_id' => $product->id,
-                'quantity' => $quantity,
+                'quantity' => 1, // Always set to 1
                 'size' => $size
             ]);
         }

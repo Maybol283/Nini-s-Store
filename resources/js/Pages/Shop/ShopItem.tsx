@@ -17,8 +17,12 @@ export default function ShopItem({ product, relatedProducts }: Props) {
         product.sizes && product.sizes.length > 0 ? product.sizes[0] : ""
     );
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    console.log(relatedProducts);
+    const [isLoading, setIsLoading] = useState(false);
+
     const addToCart = () => {
+        // Set loading state to true when process starts
+        setIsLoading(true);
+
         const cartItem = {
             id: `${product.id}-${selectedSize}`,
             product_id: product.id,
@@ -35,6 +39,22 @@ export default function ShopItem({ product, relatedProducts }: Props) {
             quantity: 1,
         };
 
+        // Check if item already exists in cart by product_id
+        const cart = cartStorage.getCart();
+
+        // Check if any item in the cart has the same product_id
+        const itemExists = Object.values(cart.items).some(
+            (item: any) => item.product_id === product.id
+        );
+
+        if (itemExists) {
+            setIsLoading(false); // Reset loading state
+            alert("This item is already in your cart");
+            router.visit("/shop");
+            return;
+        }
+
+        // Add the item to cart
         cartStorage.addItem(cartItem);
 
         // Sync with server
@@ -46,10 +66,15 @@ export default function ShopItem({ product, relatedProducts }: Props) {
             {
                 preserveScroll: true,
                 onSuccess: () => {
+                    // Reset loading state on success
+                    setIsLoading(false);
                     router.reload({ only: ["cart"] });
                     console.log("Cart updated successfully");
+                    router.visit("/shop");
                 },
                 onError: (error) => {
+                    // Reset loading state on error
+                    setIsLoading(false);
                     console.log("Error updating cart:", error);
                 },
             }
@@ -225,16 +250,42 @@ export default function ShopItem({ product, relatedProducts }: Props) {
                         <div className="mt-10">
                             <button
                                 onClick={addToCart}
-                                disabled={!product.in_stock}
+                                disabled={!product.in_stock || isLoading}
                                 className={`flex w-full items-center justify-center rounded-xl border border-transparent px-8 py-3 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                                    product.in_stock
+                                    product.in_stock && !isLoading
                                         ? "bg-green hover:bg-opacity-90 focus:ring-green"
                                         : "bg-gray-400 cursor-not-allowed"
                                 }`}
                             >
-                                {product.in_stock
-                                    ? "Add to cart"
-                                    : "Out of stock"}
+                                {isLoading ? (
+                                    <>
+                                        <svg
+                                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-pink"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            ></circle>
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            ></path>
+                                        </svg>
+                                        Adding to cart...
+                                    </>
+                                ) : product.in_stock ? (
+                                    "Add to cart"
+                                ) : (
+                                    "Out of stock"
+                                )}
                             </button>
                         </div>
 

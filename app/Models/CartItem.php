@@ -32,7 +32,8 @@ class CartItem extends Model
 
     public function updateQuantity(int $quantity)
     {
-        $this->update(['quantity' => $quantity]);
+        // Always set quantity to 1
+        $this->update(['quantity' => 1]);
         $this->cart->updateTotals();
     }
 }
