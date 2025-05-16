@@ -183,6 +183,27 @@ class ShopController extends Controller
     {
         $product = Product::findOrFail($id);
 
+        $relatedProducts = Product::where('category', $product->category)
+            ->where('age_group', $product->age_group)
+            ->where('id', '!=', $product->id)
+            ->where('in_stock', true)
+            ->orderBy('created_at', 'desc')
+            ->take(4)
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'price' => $product->price,
+                    'description' => $product->description,
+                    'category' => $product->category,
+                    'images' => $product->images,
+                    'size' => $product->size,
+                    'in_stock' => $product->in_stock,
+                    'age_group' => $product->age_group,
+                ];
+            });
+
         return Inertia::render('Shop/ShopItem', [
             'product' => [
                 'id' => $product->id,
@@ -194,7 +215,8 @@ class ShopController extends Controller
                 'size' => $product->size,
                 'in_stock' => $product->in_stock,
                 'age_group' => $product->age_group,
-            ]
+            ],
+            'relatedProducts' => $relatedProducts,
         ]);
     }
 

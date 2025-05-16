@@ -22,9 +22,9 @@ const Gallery = ({ images }: Props) => {
     );
     const [isOpen, setIsOpen] = useState(false);
     const trail = useTrail(images.length, {
-        from: { opacity: 0, y: 20 },
-        to: { opacity: 1, y: 0 },
-        delay: 100,
+        from: { opacity: 0, transform: "translateY(20px)" },
+        to: { opacity: 1, transform: "translateY(0px)" },
+        config: { tension: 200, friction: 20 },
     });
 
     const openModal = (image: GalleryImage) => {
@@ -40,22 +40,18 @@ const Gallery = ({ images }: Props) => {
         <ShopLayout>
             <Head title="Gallery" />
 
-            <div className="min-h-screen pb-4 px-4 sm:px-6 lg:px-8 flex-none overflow-x-hidden">
+            <div className="min-h-screen pb-4 px-4 sm:px-6 lg:px-8 flex-none overflow-y-hidden">
                 <div className="max-w-7xl mx-auto">
-                    <h1 className="text-4xl font-bold text-cream text-center mb-12">
-                        Our Gallery
+                    <h1 className="text-4xl font-bold text-green text-center my-12">
+                        Gallery
                     </h1>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {trail.map((props, index) => (
+                            //@ts-ignore
                             <animated.div
                                 key={index}
-                                style={{
-                                    opacity: props.opacity,
-                                    transform: props.y.to(
-                                        (y) => `translateY(${y}px)`
-                                    ),
-                                }}
+                                style={props}
                                 className="relative aspect-square overflow-hidden rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                                 onClick={() => openModal(images[index])}
                             >

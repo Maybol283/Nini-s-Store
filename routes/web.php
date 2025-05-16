@@ -5,6 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\ContactController;
 use App\Http\Middleware\AdminOnly;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -74,6 +75,9 @@ Route::get('/checkout/thank-you', [CheckoutController::class, 'thankYou'])->name
 
 // Gallery routes
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
+
+// Contact routes
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 // Admin routes - using direct class reference 
 Route::prefix('admin')

@@ -367,7 +367,7 @@ function Create() {
                                         <img
                                             src={url}
                                             alt={`Preview ${index + 1}`}
-                                            className="w-full h-32 object-cover rounded-md border border-gray-200"
+                                            className="w-30 h-full object-cover rounded-md border border-gray-200"
                                         />
                                         <button
                                             type="button"

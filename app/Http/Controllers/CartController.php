@@ -38,7 +38,7 @@ class CartController extends Controller
         $product = Product::findOrFail($request->product_id);
         $this->cartService->addToCart(
             $product,
-            $request->quantity
+            1,
         );
 
         return redirect()->back()->with('success', 'Product added to cart successfully!');

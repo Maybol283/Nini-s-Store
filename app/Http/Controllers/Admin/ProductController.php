@@ -90,7 +90,7 @@ class ProductController extends Controller
                 'image',
                 'mimes:jpeg,png,jpg',
                 'max:2048', // 2MB
-                'dimensions:min_width=100,min_height=100,max_width=2000,max_height=2000'
+                'dimensions:min_width=100,min_height=100,max_width=2500,max_height=2500'
             ],
             'inStock' => 'required|boolean',
         ], [
