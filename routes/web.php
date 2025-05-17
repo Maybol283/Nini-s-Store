@@ -6,6 +6,8 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Admin\ProductController;
 use App\Http\Middleware\AdminOnly;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -81,12 +83,12 @@ Route::post('/contact', [ContactController::class, 'store'])->name('contact.stor
 
 // Order routes for authenticated users
 Route::middleware(['auth'])->group(function () {
-    Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{id}', [\App\Http\Controllers\OrderController::class, 'show'])->name('orders.show');
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
 
     // Admin only routes - using class name directly instead of alias
-    Route::middleware([\App\Http\Middleware\AdminOnly::class])->group(function () {
-        Route::post('/orders/{id}/update-status', [\App\Http\Controllers\OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::middleware([AdminOnly::class])->group(function () {
+        Route::post('/orders/{id}/update-status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     });
 });
 
@@ -96,16 +98,20 @@ Route::prefix('admin')
     ->middleware(['web', 'auth', AdminOnly::class])
     ->group(function () {
         // Products management
-        Route::get('/products/create', [\App\Http\Controllers\Admin\ProductController::class, 'create'])
+        Route::get('/products/create', [ProductController::class, 'create'])
             ->name('products.create');
-        Route::post('/products', [\App\Http\Controllers\Admin\ProductController::class, 'store'])
+        Route::post('/products', [ProductController::class, 'store'])
             ->name('products.store');
-        Route::get('/products', [\App\Http\Controllers\Admin\ProductController::class, 'index'])
+        Route::get('/products', [ProductController::class, 'index'])
             ->name('products.index');
-        Route::get('/products/{product}/edit', [\App\Http\Controllers\Admin\ProductController::class, 'edit'])
+        Route::get('/products/{product}/edit', [ProductController::class, 'edit'])
             ->name('products.edit');
-        Route::put('/products/{product}', [\App\Http\Controllers\Admin\ProductController::class, 'update'])
+        Route::put('/products/{product}', [ProductController::class, 'update'])
             ->name('products.update');
-        Route::delete('/products/{product}', [\App\Http\Controllers\Admin\ProductController::class, 'destroy'])
+        Route::delete('/products/{product}', [ProductController::class, 'destroy'])
             ->name('products.destroy');
+
+        // Orders management
+        Route::get('/orders', [OrderController::class, 'adminIndex'])
+            ->name('orders.index');
     });

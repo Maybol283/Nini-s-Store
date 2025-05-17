@@ -119,4 +119,86 @@ class OrderController extends Controller
 
         return redirect()->back()->with('error', 'Order status cannot be updated further.');
     }
+
+    /**
+     * Display a listing of all orders for admin management.
+     */
+    public function adminIndex(Request $request)
+    {
+        $user = Auth::user();
+
+        // Only allow admin users to view all orders
+        if (!$user || $user->role !== 'admin') {
+            return redirect()->route('orders.index')->with('error', 'You do not have permission to access this area.');
+        }
+
+        $query = Order::with('items.product')
+            ->orderBy('created_at', 'desc');
+
+
+
+        // Handle filtering by status if provided
+        if ($request->has('status') && !empty($request->status)) {
+            $query->where('status', $request->status);
+        }
+
+        $orders = $query->get()
+            ->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'user_id' => $order->user_id,
+                    'customer_name' => $order->shipping_name,
+                    'customer_email' => $order->shipping_email,
+                    'status' => $order->status,
+                    'total_amount' => $order->total_amount,
+                    'created_at' => $order->created_at->format('M d, Y'),
+                    'items_count' => $order->items->count(),
+                    'first_item' => $order->items->first() ? [
+                        'product_name' => $order->items->first()->product_name,
+                        'image' => $order->items->first()->product ?
+                            $order->items->first()->product->images[0]['imageSrc'] ?? '/images/placeholder.png' :
+                            '/images/placeholder.png',
+                    ] : null,
+                    // Include full shipping details
+                    'shipping' => [
+                        'name' => $order->shipping_name,
+                        'email' => $order->shipping_email,
+                        'address_line1' => $order->shipping_address_line1,
+                        'address_line2' => $order->shipping_address_line2,
+                        'city' => $order->shipping_city,
+                        'postal_code' => $order->shipping_postal_code,
+                        'country' => $order->shipping_country,
+                    ],
+                    // Include all order items
+                    'items' => $order->items->map(function ($item) {
+                        return [
+                            'id' => $item->id,
+                            'product_name' => $item->product_name,
+                            'price' => $item->price,
+                            'quantity' => $item->quantity,
+                            'size' => $item->size,
+                            'image' => $item->product ?
+                                $item->product->images[0]['imageSrc'] ?? '/images/placeholder.png' :
+                                '/images/placeholder.png',
+                        ];
+                    })
+                ];
+            });
+
+        return Inertia::render('Admin/Orders/Index', [
+            'orders' => $orders,
+            'filters' => [
+                'status' => $request->status ?? ''
+            ],
+            'statuses' => [
+                'pending',
+                'processing',
+                'shipped',
+                'delivered',
+                'cancelled'
+            ],
+            'success' => session('success'),
+            'error' => session('error')
+        ]);
+    }
 }

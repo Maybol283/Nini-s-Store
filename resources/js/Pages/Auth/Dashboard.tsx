@@ -126,6 +126,14 @@ const Dashboard = ({ user }: Props) => {
                                                     Manage Products
                                                 </Link>
                                             </li>
+                                            <li>
+                                                <Link
+                                                    href="/admin/orders"
+                                                    className="text-green hover:underline font-medium"
+                                                >
+                                                    Manage Orders
+                                                </Link>
+                                            </li>
                                         </>
                                     )}
                                 </ul>
