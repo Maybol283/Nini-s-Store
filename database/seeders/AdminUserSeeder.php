@@ -17,14 +17,14 @@ class AdminUserSeeder extends Seeder
         // Create a temporary admin user
         User::create([
             'name' => 'Admin User',
-            'email' => 'admin@ninisstore.com',
+            'email' => 'nigorabay1998@gmail.com',
             'password' => Hash::make('admin123'), // Temporary password, change in production
             'role' => 'admin',
             'email_verified_at' => now(),
         ]);
 
         $this->command->info('Temporary admin user created:');
-        $this->command->info('Email: admin@ninisstore.com');
+        $this->command->info('Email: nigorabay1998@gmail.com');
         $this->command->info('Password: admin123');
         $this->command->warn('Please change this password in production!');
     }

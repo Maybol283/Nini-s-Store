@@ -1,6 +1,7 @@
 import React, { FormEvent, useState } from "react";
 import { Head, Link, router } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout";
+import ShopLayout from "@/Layouts/ShopLayout";
 
 interface OrderItem {
     id: number;
@@ -148,7 +149,7 @@ const Index = ({ orders, filters, statuses, success, error }: Props) => {
     };
 
     return (
-        <div className="font-sans py-12 bg-cream min-h-screen">
+        <div className="font-sans py-12 bg-cream">
             <Head title="Manage Orders" />
 
             <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -165,7 +166,7 @@ const Index = ({ orders, filters, statuses, success, error }: Props) => {
                 )}
 
                 <div className="bg-white overflow-hidden shadow-sm rounded-lg">
-                    <div className="p-6 bg-white border-b border-gray-200">
+                    <div className="p-6 bg-white border-b border-gray-200 min-w-[90vw]">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-semibold text-green">
                                 Manage Orders
@@ -233,7 +234,7 @@ const Index = ({ orders, filters, statuses, success, error }: Props) => {
                                 </p>
                             </div>
                         ) : (
-                            <div className="overflow-x-auto">
+                            <div className="overflow max-h-[60vh] overflow-y-auto">
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
                                         <tr>
@@ -660,8 +661,6 @@ const Index = ({ orders, filters, statuses, success, error }: Props) => {
 };
 
 // Set the layout
-Index.layout = (page: React.ReactNode) => (
-    <MainLayout title="Manage Orders" children={page} />
-);
+Index.layout = (page: React.ReactNode) => <ShopLayout children={page} />;
 
 export default Index;

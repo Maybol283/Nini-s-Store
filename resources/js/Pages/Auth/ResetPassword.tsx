@@ -1,27 +1,36 @@
-import React, { FormEvent, useState } from "react";
-import { Head, Link, router } from "@inertiajs/react";
+import React, { FormEvent, useState, useEffect } from "react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout";
 
 interface Props {
-    status?: string;
+    token: string;
+    email: string;
 }
 
-const Login = ({ status }: Props) => {
-    const [email, setEmail] = useState("");
+const ResetPassword = ({ token, email }: Props) => {
     const [password, setPassword] = useState("");
-    const [remember, setRemember] = useState(false);
-    const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-        {}
-    );
+    const [passwordConfirmation, setPasswordConfirmation] = useState("");
+    const [errors, setErrors] = useState<{
+        email?: string;
+        password?: string;
+        password_confirmation?: string;
+        token?: string;
+    }>({});
     const [processing, setProcessing] = useState(false);
+    const [emailInput, setEmailInput] = useState(email || "");
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         setProcessing(true);
 
         router.post(
-            "/login",
-            { email, password, remember },
+            "/reset-password",
+            {
+                token,
+                email: emailInput,
+                password,
+                password_confirmation: passwordConfirmation,
+            },
             {
                 onSuccess: () => {
                     setProcessing(false);
@@ -35,19 +44,13 @@ const Login = ({ status }: Props) => {
     };
 
     return (
-        <div className="flex items-center justify-center w-screen h-screen bg-cream">
-            <Head title="Login" />
+        <div className="flex flex-col items-center justify-center w-screen h-screen bg-cream">
+            <Head title="Reset Password" />
 
             <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
                 <h1 className="text-3xl font-bold text-center mb-6 text-green">
-                    Login
+                    Reset Password
                 </h1>
-
-                {status && (
-                    <div className="mb-4 p-3 bg-green-50 text-green-600 rounded">
-                        {status}
-                    </div>
-                )}
 
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
@@ -60,10 +63,11 @@ const Login = ({ status }: Props) => {
                         <input
                             id="email"
                             type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            value={emailInput}
+                            onChange={(e) => setEmailInput(e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green focus:border-green"
                             required
+                            readOnly={!!email}
                         />
                         {errors.email && (
                             <p className="mt-1 text-sm text-red-600">
@@ -77,7 +81,7 @@ const Login = ({ status }: Props) => {
                             htmlFor="password"
                             className="block text-sm font-medium text-gray-700 mb-1"
                         >
-                            Password
+                            New Password
                         </label>
                         <input
                             id="password"
@@ -94,48 +98,47 @@ const Login = ({ status }: Props) => {
                         )}
                     </div>
 
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center">
-                            <input
-                                id="remember"
-                                type="checkbox"
-                                checked={remember}
-                                onChange={(e) => setRemember(e.target.checked)}
-                                className="h-4 w-4 text-green focus:ring-green border-gray-300 rounded"
-                            />
-                            <label
-                                htmlFor="remember"
-                                className="ml-2 block text-sm text-gray-700"
-                            >
-                                Remember me
-                            </label>
-                        </div>
-                        <div>
-                            <Link
-                                href={route("password.request")}
-                                className="text-sm text-green hover:underline"
-                            >
-                                Forgot password?
-                            </Link>
-                        </div>
+                    <div className="mb-4">
+                        <label
+                            htmlFor="password_confirmation"
+                            className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                            Confirm New Password
+                        </label>
+                        <input
+                            id="password_confirmation"
+                            type="password"
+                            value={passwordConfirmation}
+                            onChange={(e) =>
+                                setPasswordConfirmation(e.target.value)
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green focus:border-green"
+                            required
+                        />
                     </div>
+
+                    {errors.token && (
+                        <div className="mb-4 p-3 bg-red-50 text-red-600 rounded">
+                            {errors.token}
+                        </div>
+                    )}
 
                     <button
                         type="submit"
                         disabled={processing}
                         className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-green hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green"
                     >
-                        {processing ? "Logging in..." : "Log in"}
+                        {processing ? "Resetting..." : "Reset Password"}
                     </button>
 
                     <div className="mt-4 text-center">
                         <p className="text-sm text-gray-600">
-                            Don't have an account?{" "}
+                            Remember your password?{" "}
                             <Link
-                                href="/register"
+                                href="/login"
                                 className="text-green hover:underline"
                             >
-                                Register
+                                Log in
                             </Link>
                         </p>
                     </div>
@@ -146,8 +149,8 @@ const Login = ({ status }: Props) => {
 };
 
 // Set the layout
-Login.layout = (page: React.ReactNode) => (
-    <MainLayout title="Login" children={page} />
+ResetPassword.layout = (page: React.ReactNode) => (
+    <MainLayout title="Reset Password" children={page} />
 );
 
-export default Login;
+export default ResetPassword;

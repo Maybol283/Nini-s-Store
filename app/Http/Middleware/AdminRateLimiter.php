@@ -23,7 +23,7 @@ class AdminRateLimiter
         $key = sprintf('admin:%s:%s', $request->ip(), Auth::id() ?? 'guest');
 
         // Allow 30 requests per minute for admin routes
-        if ($this->limiter->tooManyAttempts($key, 30)) {
+        if ($this->limiter->tooManyAttempts($key, 10)) {
             return response()->json([
                 'message' => 'Too many attempts. Please try again later.',
             ], 429);

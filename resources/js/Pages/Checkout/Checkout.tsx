@@ -306,7 +306,7 @@ function CheckoutForm() {
                                     phone: shippingDetails?.phone,
                                 },
                                 email: "nigorabay1998@gmail.com",
-                                total_amount: paymentIntent.amount,
+                                total_amount: paymentIntent.amount / 100,
                             });
 
                             break;

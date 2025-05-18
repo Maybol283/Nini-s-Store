@@ -82,7 +82,7 @@ Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 // Order routes for authenticated users
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
 
@@ -95,7 +95,7 @@ Route::middleware(['auth'])->group(function () {
 // Admin routes - using direct class reference 
 Route::prefix('admin')
     ->name('admin.')
-    ->middleware(['web', 'auth', AdminOnly::class])
+    ->middleware(['web', 'auth', 'verified', AdminOnly::class])
     ->group(function () {
         // Products management
         Route::get('/products/create', [ProductController::class, 'create'])
