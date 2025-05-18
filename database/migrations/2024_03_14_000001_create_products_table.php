@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->decimal('price', 8, 2);
-            $table->enum('category', ['scarves', 'sweaters', 'hats', 'gloves', 'miscellaneous']);
+            $table->enum('category', ['scarves', 'sweaters', 'hats', 'gloves', 'dresses', 'miscellaneous']);
             $table->enum('age_group', ['adult', 'baby']);
             $table->string('size',); // Will contain either adult or baby sizes based on age_group
             $table->json('images'); // Array of image objects with src and alt

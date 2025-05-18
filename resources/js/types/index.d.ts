@@ -21,7 +21,13 @@ export interface Product {
     name: string;
     description: string;
     price: number;
-    category: "scarves" | "sweaters" | "hats" | "gloves" | "miscellaneous";
+    category:
+        | "scarves"
+        | "sweaters"
+        | "hats"
+        | "gloves"
+        | "dresses"
+        | "miscellaneous";
     age_group: "adult" | "baby";
     sizes: string[];
     images: Image[];

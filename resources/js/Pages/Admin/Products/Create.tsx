@@ -25,6 +25,7 @@ const categories = [
     { value: "sweaters", label: "Sweaters" },
     { value: "hats", label: "Hats" },
     { value: "gloves", label: "Gloves" },
+    { value: "dresses", label: "Dresses" },
     { value: "miscellaneous", label: "Miscellaneous" },
 ];
 
