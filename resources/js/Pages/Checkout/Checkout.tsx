@@ -21,8 +21,8 @@ import {
 import { cartStorage } from "@/Utils/cartStorage";
 
 const Billings = {
-    VAT: 0.2,
-    Shipping: 10,
+    Shipping: 5,
+    VAT: 0.0,
 };
 
 // We'll get the stripe key from the server props now
@@ -32,8 +32,6 @@ export default function Checkout() {
     const cartItems = Object.values(cart.items || {});
     const [error, setError] = useState<string | null>(stripeError || null);
     const [stripePromise, setStripePromise] = useState<any>(null);
-
-    console.log(cart.items);
 
     // Calculate total amount including VAT and shipping
     const totalAmount = (
@@ -255,7 +253,7 @@ function CheckoutForm() {
     const [message, setMessage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isProcessingOrder, setIsProcessingOrder] = useState(false);
-    const [email, setEmail] = useState<string | null>(null);
+    const [email, setEmail] = useState<string>("");
 
     useEffect(() => {
         if (!stripe) {
@@ -277,17 +275,12 @@ function CheckoutForm() {
 
                     switch (paymentIntent.status) {
                         case "succeeded":
-                            setMessage("Payment succeeded!");
-                            console.log("Payment succeeded!");
                             const shippingDetails = paymentIntent.shipping;
                             // Clear cart locally BEFORE processing
                             cartStorage.clearCart();
-                            console.log("Cart cleared!");
+
                             setIsProcessingOrder(true);
-                            console.log("Order processing started!");
-                            console.log(shippingDetails);
-                            console.log(paymentIntent);
-                            console.log(email);
+
                             // Process the successful payment on the server with all required details
                             router.post("/checkout/process-payment", {
                                 payment_intent_id: paymentIntent.id,
@@ -305,10 +298,9 @@ function CheckoutForm() {
                                     },
                                     phone: shippingDetails?.phone,
                                 },
-                                email: "nigorabay1998@gmail.com",
-                                total_amount: paymentIntent.amount / 100,
+                                email: sessionStorage.getItem("checkoutEmail"),
                             });
-
+                            sessionStorage.removeItem("checkoutEmail");
                             break;
                         case "processing":
                             setMessage("Your payment is processing.");
@@ -380,8 +372,18 @@ function CheckoutForm() {
     }
 
     return (
-        <form id="payment-form" onSubmit={handleSubmit}>
-            <LinkAuthenticationElement />
+        <form
+            id="payment-form"
+            onSubmit={(e) => {
+                sessionStorage.setItem("checkoutEmail", email);
+                handleSubmit(e);
+            }}
+        >
+            <LinkAuthenticationElement
+                onChange={(e) => {
+                    setEmail(e.value.email);
+                }}
+            />
 
             <div className="mt-6">
                 <h3 className="text-sm font-medium text-brown mb-2">

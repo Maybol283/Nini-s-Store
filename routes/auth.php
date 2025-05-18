@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -38,6 +39,14 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
+
+    // Password update
+    Route::get('/update-password', function () {
+        return Inertia::render('Auth/UpdatePassword');
+    })->name('password.edit');
+
+    Route::put('/password', [PasswordController::class, 'update'])
+        ->name('password.update');
 
     // Email Verification Routes
     Route::get('/email/verify', function () {

@@ -72,6 +72,14 @@ const Dashboard = ({ user }: Props) => {
                                         Administrator
                                     </p>
                                 )}
+                                <div className="mt-4 pt-3 border-t border-gray-200">
+                                    <Link
+                                        href={route("password.edit")}
+                                        className="text-green hover:underline"
+                                    >
+                                        Update Password
+                                    </Link>
+                                </div>
                             </div>
 
                             <div className="bg-pink bg-opacity-10 p-4 rounded-lg">
@@ -101,6 +109,14 @@ const Dashboard = ({ user }: Props) => {
                                             className="text-brown hover:underline"
                                         >
                                             Your Orders
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link
+                                            href={route("password.edit")}
+                                            className="text-brown hover:underline"
+                                        >
+                                            Update Password
                                         </Link>
                                     </li>
                                     {isAdmin && (

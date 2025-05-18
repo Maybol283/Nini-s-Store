@@ -30,8 +30,8 @@ class CheckoutController extends Controller
                 Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
 
                 // Calculate the total with VAT and shipping
-                $shipping = 10;
-                $vat = $cart['total'] * 0.2;
+                $shipping = 5;
+                $vat = $cart['total'] * 0.0;
                 $totalAmount = $cart['total'] + $shipping + $vat;
 
                 // Create a PaymentIntent with the calculated amount
@@ -124,7 +124,7 @@ class CheckoutController extends Controller
             'shipping.address.postal_code' => 'required|string',
             'shipping.address.country' => 'required|string',
             'email' => 'required|email',
-            'total_amount' => 'required|numeric|min:0.50',
+
         ]);
 
         if ($validator->fails()) {
@@ -149,10 +149,21 @@ class CheckoutController extends Controller
 
             $cart = session('cart', ['items' => [], 'total' => 0, 'itemCount' => 0]);
 
+            // Recalculate total from trusted data
+            $cartTotal = 0;
+            foreach ($cart['items'] as $item) {
+                // Get current price from database
+                $product = Product::find($item['product_id']);
+                $cartTotal += $product->price * $item['quantity'];
+            }
+            // Add shipping and tax
+            $finalTotal = $cartTotal + $cartTotal * 0.0 + 5; // VAT + shipping
+
+
             // Create the order
             $order = Order::create([
                 'user_id' => Auth::check() ? Auth::id() : null,
-                'total_amount' => $request->total_amount,
+                'total_amount' => $finalTotal,
                 'status' => 'processing',
                 'shipping_name' => $request->shipping['name'],
                 'shipping_email' => $request->email,
@@ -176,9 +187,9 @@ class CheckoutController extends Controller
                     'size' => $product->size,
                 ]);
 
-                // Mark product as out of stock (Remove for production)
-                /*$product->in_stock = false;
-                $product->save();*/
+
+                $product->in_stock = false;
+                $product->save();
 
                 // Log the inventory update
                 logger()->info('Product marked as sold', [
