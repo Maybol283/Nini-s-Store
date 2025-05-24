@@ -30,7 +30,7 @@ export default function Home({ message }: { message: string }) {
         <div className="flex items-center justify-center h-screen bg-cream font-thin">
             <Head title="About" />
             <div className="text-center ">
-                <h1 className="text-9xl mb-4">
+                <h1 className="text-7xl md:text-9xl xl:text-xxl mb-4">
                     {trail1.map((style, index) => (
                         //@ts-ignore I have no idea why typescript cannot understand this
                         <animated.span
@@ -47,12 +47,15 @@ export default function Home({ message }: { message: string }) {
                         </animated.span>
                     ))}
                 </h1>
-                <h1 className="text-9xl mb-4">
+                <h1 className="text-7xl md:text-9xl xl:text-xxl mb-4">
                     {trail2.map((style, index) => (
                         //@ts-ignore
                         <animated.span
                             key={`t2-${index}`}
-                            style={{ ...style, display: "inline-block" }}
+                            style={{
+                                ...style,
+                                display: "inline-block",
+                            }}
                             className=" text-green"
                         >
                             {letters2[index]}

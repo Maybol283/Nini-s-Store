@@ -1,5 +1,5 @@
 import { Head, useForm } from "@inertiajs/react";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ShopLayout from "@/Layouts/ShopLayout";
 type FormDataConvertible = string | number | boolean | Blob | null;
 
@@ -49,9 +49,18 @@ function Create() {
         inStock: true,
     });
 
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [priceInput, setPriceInput] = useState("");
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
     const [availableSizes, setAvailableSizes] = useState<string[]>(adultSizes);
     const [imageErrors, setImageErrors] = useState<ImageError[]>([]);
+
+    // Initialize price input on component mount
+    useEffect(() => {
+        if (data.price > 0) {
+            setPriceInput(data.price.toString());
+        }
+    }, []);
 
     // Update available sizes when age group changes
     useEffect(() => {
@@ -129,11 +138,67 @@ function Create() {
         setData("size", size);
     };
 
+    // Handle price input change
+    const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setPriceInput(value);
+
+        // Only update the form data with a valid number
+        if (value === "" || value === "0") {
+            setData("price", 0);
+        } else {
+            const numValue = parseFloat(value);
+            if (!isNaN(numValue)) {
+                setData("price", numValue);
+            }
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         post("/admin/products", {
             forceFormData: true,
+            onError: () => {
+                // This ensures errors are displayed but allows resubmission
+                console.log(
+                    "Form submission failed, but you can try again after fixing errors"
+                );
+            },
         });
+    };
+
+    const resetForm = () => {
+        // Reset the form to initial state
+        setData({
+            name: "",
+            price: 0,
+            description: "",
+            category: categories[0].value,
+            age_group: ageGroups[0].value,
+            size: "",
+            images: [],
+            inStock: true,
+        });
+        setPriceInput("");
+        setPreviewUrls([]);
+        setImageErrors([]);
+
+        // Reset the file input element
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
+    const resetFileInput = () => {
+        // Reset just the file input and related state
+        setData("images", []);
+        setPreviewUrls([]);
+        setImageErrors([]);
+
+        // Reset the file input element
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
     };
 
     return (
@@ -195,12 +260,9 @@ function Create() {
                             Price (£)
                         </label>
                         <input
-                            type="number"
-                            step="0.01"
-                            value={data.price}
-                            onChange={(e) =>
-                                setData("price", Number(e.target.value))
-                            }
+                            type="text"
+                            value={priceInput}
+                            onChange={handlePriceChange}
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink focus:ring-pink"
                         />
                         {errors.price && (
@@ -327,6 +389,7 @@ function Create() {
                             multiple
                             accept="image/jpeg,image/png,image/jpg"
                             onChange={handleImageChange}
+                            ref={fileInputRef}
                             className={`mt-1 block w-full ${
                                 errors.images || imageErrors.length > 0
                                     ? "border-red-300 text-red-900 focus:border-red-500 focus:ring-red-500"
@@ -406,6 +469,16 @@ function Create() {
                                 ))}
                             </div>
                         )}
+
+                        {previewUrls.length > 0 && (
+                            <button
+                                type="button"
+                                onClick={resetFileInput}
+                                className="mt-2 text-sm text-red-600 hover:text-red-800"
+                            >
+                                Clear selected files
+                            </button>
+                        )}
                     </div>
 
                     {/* In Stock */}
@@ -449,41 +522,49 @@ function Create() {
                             </div>
                         )}
 
-                        <button
-                            type="submit"
-                            disabled={
-                                processing || Object.keys(errors).length > 0
-                            }
-                            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-pink hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {processing ? (
-                                <>
-                                    <svg
-                                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <circle
-                                            className="opacity-25"
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            strokeWidth="4"
-                                        ></circle>
-                                        <path
-                                            className="opacity-75"
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                        ></path>
-                                    </svg>
-                                    Adding Product...
-                                </>
-                            ) : (
-                                "Add Product"
-                            )}
-                        </button>
+                        <div className="flex space-x-4">
+                            <button
+                                type="submit"
+                                disabled={processing}
+                                className="flex-1 py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-pink hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {processing ? (
+                                    <>
+                                        <svg
+                                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            ></circle>
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            ></path>
+                                        </svg>
+                                        Adding Product...
+                                    </>
+                                ) : (
+                                    "Add Product"
+                                )}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={resetForm}
+                                className="py-3 px-4 border border-gray-300 rounded-md shadow-sm text-lg font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink"
+                            >
+                                Reset Form
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

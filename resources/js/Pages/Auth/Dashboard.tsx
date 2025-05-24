@@ -150,6 +150,14 @@ const Dashboard = ({ user }: Props) => {
                                                     Manage Orders
                                                 </Link>
                                             </li>
+                                            <li>
+                                                <Link
+                                                    href="/admin/gallery"
+                                                    className="text-green hover:underline font-medium"
+                                                >
+                                                    Manage Gallery
+                                                </Link>
+                                            </li>
                                         </>
                                     )}
                                 </ul>

@@ -1,6 +1,7 @@
-import { Head, useForm, Link } from "@inertiajs/react";
-import React, { useState, useEffect } from "react";
+import { Head, useForm, Link, router, usePage } from "@inertiajs/react";
+import React, { useState, useEffect, useRef } from "react";
 import ShopLayout from "@/Layouts/ShopLayout";
+import { PageProps } from "@/types";
 type FormDataConvertible = string | number | boolean | Blob | null;
 
 interface ProductImage {
@@ -59,6 +60,7 @@ interface Props {
 }
 
 function Edit({ product }: Props) {
+    const { flash } = usePage<PageProps>().props;
     const { data, setData, post, processing, errors } = useForm<ProductForm>({
         name: product.name,
         price: product.price,
@@ -70,6 +72,8 @@ function Edit({ product }: Props) {
         inStock: product.in_stock,
     });
 
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [priceInput, setPriceInput] = useState(product.price.toString());
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
     const [availableSizes, setAvailableSizes] = useState<string[]>(
         product.age_group === "adult" ? adultSizes : babySizes
@@ -170,13 +174,57 @@ function Edit({ product }: Props) {
         setExistingImages(updatedImages);
     };
 
+    // Handle price input change
+    const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setPriceInput(value);
+
+        // Only update the form data with a valid number
+        if (value === "" || value === "0") {
+            setData("price", 0);
+        } else {
+            const numValue = parseFloat(value);
+            if (!isNaN(numValue)) {
+                setData("price", numValue);
+            }
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         // Send PUT request with method spoofing
         post(`/admin/products/${product.id}?_method=PUT`, {
             forceFormData: true,
+            onError: () => {
+                // This ensures errors are displayed but allows resubmission
+                console.log(
+                    "Form submission failed, but you can try again after fixing errors"
+                );
+            },
         });
+    };
+
+    const resetFileInput = () => {
+        // Reset just the file input and related state
+        setData("images", []);
+        setPreviewUrls([]);
+        setImageErrors([]);
+
+        // Reset the file input element
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
+    const addToGallery = (imageSrc: string) => {
+        if (
+            confirm("Are you sure you want to add this image to the gallery?")
+        ) {
+            router.post(`/gallery/add/${product.id}`, {
+                image_url: imageSrc,
+            });
+        }
     };
 
     return (
@@ -194,6 +242,18 @@ function Edit({ product }: Props) {
                         Back to Products
                     </Link>
                 </div>
+
+                {flash.success && (
+                    <div className="mb-4 p-3 bg-green-50 text-green-600 border border-green-200 rounded-md">
+                        {flash.success}
+                    </div>
+                )}
+
+                {flash.error && (
+                    <div className="mb-4 p-3 bg-red-50 text-red-600 border border-red-200 rounded-md">
+                        {flash.error}
+                    </div>
+                )}
 
                 {data.age_group && (
                     <div className="mb-4">
@@ -243,12 +303,9 @@ function Edit({ product }: Props) {
                             Price (£)
                         </label>
                         <input
-                            type="number"
-                            step="0.01"
-                            value={data.price}
-                            onChange={(e) =>
-                                setData("price", Number(e.target.value))
-                            }
+                            type="text"
+                            value={priceInput}
+                            onChange={handlePriceChange}
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink focus:ring-pink"
                         />
                         {errors.price && (
@@ -377,30 +434,55 @@ function Edit({ product }: Props) {
                                         <img
                                             src={image.imageSrc}
                                             alt={image.imageAlt}
-                                            className="w-full h-32 object-cover rounded-md border border-gray-200"
+                                            className="h-full w-30 object-cover rounded-md border border-gray-200"
                                         />
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                removeExistingImage(index)
-                                            }
-                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                        >
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-4 w-4"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
+                                        <div className="absolute top-1 right-1 flex space-x-1">
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    addToGallery(image.imageSrc)
+                                                }
+                                                className="bg-green text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                title="Add to Gallery"
                                             >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M6 18L18 6M6 6l12 12"
-                                                />
-                                            </svg>
-                                        </button>
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    className="h-4 w-4"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                    />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    removeExistingImage(index)
+                                                }
+                                                className="bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    className="h-4 w-4"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M6 18L18 6M6 6l12 12"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -422,6 +504,7 @@ function Edit({ product }: Props) {
                             multiple
                             accept="image/jpeg,image/png,image/jpg"
                             onChange={handleImageChange}
+                            ref={fileInputRef}
                             className={`mt-1 block w-full ${
                                 errors.images || imageErrors.length > 0
                                     ? "border-red-300 text-red-900 focus:border-red-500 focus:ring-red-500"
@@ -465,7 +548,7 @@ function Edit({ product }: Props) {
                                         <img
                                             src={url}
                                             alt={`Preview ${index + 1}`}
-                                            className="w-full h-32 object-cover rounded-md border border-gray-200"
+                                            className="w-30 h-full object-cover rounded-md border border-gray-200"
                                         />
                                         <button
                                             type="button"
@@ -502,6 +585,16 @@ function Edit({ product }: Props) {
                                     </div>
                                 ))}
                             </div>
+                        )}
+
+                        {previewUrls.length > 0 && (
+                            <button
+                                type="button"
+                                onClick={resetFileInput}
+                                className="mt-2 text-sm text-red-600 hover:text-red-800"
+                            >
+                                Clear selected files
+                            </button>
                         )}
                     </div>
 

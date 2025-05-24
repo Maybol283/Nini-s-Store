@@ -12,6 +12,9 @@ export default {
     ],
     theme: {
         extend: {
+            fontSize: {
+                xxl: "16rem",
+            },
             colors: {
                 cream: "#FDF5E6",
                 beige: "#E6D5B8",

@@ -77,6 +77,15 @@ Route::get('/checkout/thank-you', [CheckoutController::class, 'thankYou'])->name
 
 // Gallery routes
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
+Route::post('/gallery/add/{product}', [GalleryController::class, 'addToGallery'])
+    ->name('gallery.add')->middleware(['auth', 'verified', AdminOnly::class]);
+
+// Admin Gallery management routes
+Route::middleware(['auth', 'verified', AdminOnly::class])->group(function () {
+    Route::get('/admin/gallery', [GalleryController::class, 'manage'])->name('gallery.manage');
+    Route::post('/admin/gallery/upload', [GalleryController::class, 'upload'])->name('gallery.upload');
+    Route::delete('/admin/gallery/{filename}', [GalleryController::class, 'destroy'])->name('gallery.destroy');
+});
 
 // Contact routes
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
